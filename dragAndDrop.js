@@ -1,6 +1,6 @@
 import addGlobalEventListener from './utils/addGlobalEventListener.js'
 
-export default function setup() {
+export default function setup(onDragComplete) {
   addGlobalEventListener('mousedown', '[data-draggable]', (e) => {
     const selectedItem = e.target
     const itemClone = selectedItem.cloneNode(true)
@@ -8,27 +8,45 @@ export default function setup() {
     const originalLane = selectedItem.closest('[data-drop-zone]')
     const offset = setupDragItems(selectedItem, itemClone, ghost, e)
 
-    setupDragEvents(selectedItem, itemClone, offset, originalLane, ghost)
+    setupDragEvents({
+      selectedItem,
+      itemClone,
+      ghost,
+      offset,
+      originalLane,
+      onDragComplete
+    })
   })
 }
 
 /**
  * 拖曳和放開
- * @param {Element} selectedItem 
- * @param {Element} itemClone 
- * @param {Object} offset 
- * @param {Element} originalLane 
- * @param {Element} ghost 
+ * @param {Object} 永Object包凱
+ * @param {Element} selectedItem 選取的物件
+ * @param {Element} itemClone selectedItem的複製品，拿來做拖曳殘影
+ * @param {Element} ghost selectedItem的複製品，拿來看selectedItem要移動到哪裡
+ * @param {Object} offset 滑鼠點擊時對物件left和top的相對距離
+ * @param {Element} originalLane selectedItem原本的欄位
+ * @param {Function} onDragComplete script.js要資訊用的
  */
-function setupDragEvents(selectedItem, itemClone, offset, originalLane, ghost) {
+function setupDragEvents({
+  selectedItem,
+  itemClone,
+  ghost,
+  offset,
+  originalLane,
+  onDragComplete
+}) {
   const mousemoveFunction = (e) => {
     positionClone(itemClone, e, offset)
     const dropZone = e.target.closest('[data-drop-zone]')
+
     if (dropZone == null) return
-    const closestChild = [...dropZone.children].find(child => {
+    const closestChild = [...dropZone.children].find((child) => {
       const rect = child.getBoundingClientRect()
-      return e.clientY < (rect.top + rect.height / 2)
+      return e.clientY < rect.top + rect.height / 2
     })
+
     if (closestChild) {
       dropZone.insertBefore(ghost, closestChild)
     } else {
@@ -38,42 +56,48 @@ function setupDragEvents(selectedItem, itemClone, offset, originalLane, ghost) {
 
   document.addEventListener('mousemove', mousemoveFunction)
 
-  document.addEventListener('mouseup', (e) => {
-    document.removeEventListener('mousemove', mousemoveFunction)
+  document.addEventListener(
+    'mouseup',
+    (e) => {
+      document.removeEventListener('mousemove', mousemoveFunction)
+      const dropZone = e.target.closest('[data-drop-zone]')
 
-    stopDrag(itemClone, ghost, selectedItem, originalLane, e)
+      if (dropZone) {
+        dropZone.insertBefore(selectedItem, ghost)
+      } else {
+        originalLane.appendChild(selectedItem)
+      }
 
-  }, { once: true })
+      stopDrag(itemClone, ghost)
+
+      onDragComplete({
+        startZone: originalLane,
+        endZone: dropZone,
+        dragElement: selectedItem,
+        index: [...dropZone.children].indexOf(selectedItem)
+      })
+    },
+    { once: true }
+  )
   // 只執行一次，不然物件會疊加，每次滑鼠放掉時，前面點過的物件都會再次被移動
 }
 
 /**
- * 停止拖曳時把選取的物件移動到它該去的地方
- * @param {Element} itemClone 
- * @param {Element} ghost 
- * @param {Element} selectedItem 
- * @param {Element} originalLane 物件原本的欄位
- * @param {Event} e 
+ * 把拿來做拖曳效果的物件移除
+ * @param {Element} itemClone
+ * @param {Element} ghost
  */
-function stopDrag(itemClone, ghost, selectedItem, originalLane, e) {
-  const dropZone = e.target.closest('[data-drop-zone]')
-
-  if (dropZone) {
-    dropZone.insertBefore(selectedItem, ghost)
-  } else {
-    originalLane.appendChild(selectedItem)
-  }
-
+function stopDrag(itemClone, ghost) {
   itemClone.remove()
   ghost.remove()
 }
 
 /**
  * 拖曳效果
- * @param {Element} selectedItem 
- * @param {Element} itemClone 
- * @param {Element} ghost 
- * @param {Event} e 
+ * @param {Element} selectedItem
+ * @param {Element} itemClone
+ * @param {Element} ghost
+ * @param {Event} e
  * @returns {Object} offset
  */
 function setupDragItems(selectedItem, itemClone, ghost, e) {
@@ -104,9 +128,9 @@ function setupDragItems(selectedItem, itemClone, ghost, e) {
 
 /**
  * 定位被選取的物件位置
- * @param {Element} itemClone 
- * @param {Event} event 
- * @param {Object} offset 滑鼠點擊物件時的對物件left和top的相對距離
+ * @param {Element} itemClone
+ * @param {Event} event
+ * @param {Object} offset 滑鼠點擊時對物件left和top的相對距離
  */
 function positionClone(itemClone, event, offset) {
   itemClone.style.top = `${event.clientY - offset.y}px`
