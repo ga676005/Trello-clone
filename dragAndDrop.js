@@ -2,6 +2,9 @@ import addGlobalEventListener from './utils/addGlobalEventListener.js'
 
 export default function setup(onDragComplete) {
   addGlobalEventListener('mousedown', '[data-draggable]', (e) => {
+    const root = document.documentElement
+    root.style.setProperty('--grab', 'grabbing')
+
     const selectedItem = e.target
     const itemClone = selectedItem.cloneNode(true)
     const ghost = selectedItem.cloneNode(true)
@@ -59,23 +62,21 @@ function setupDragEvents({
   document.addEventListener(
     'mouseup',
     (e) => {
+      const root = document.documentElement
+      root.style.setProperty('--grab', 'initial')
+
       document.removeEventListener('mousemove', mousemoveFunction)
-      const dropZone = e.target.closest('[data-drop-zone]')
+      const ghostZone = ghost.closest('[data-drop-zone]')
 
-      if (dropZone) {
-        dropZone.insertBefore(selectedItem, ghost)
-      } else {
-        originalLane.appendChild(selectedItem)
-      }
-
-      stopDrag(itemClone, ghost)
-
+      ghostZone.insertBefore(selectedItem, ghost)
       onDragComplete({
         startZone: originalLane,
-        endZone: dropZone,
+        endZone: ghostZone,
         dragElement: selectedItem,
-        index: [...dropZone.children].indexOf(selectedItem)
+        index: [...ghostZone.children].indexOf(selectedItem)
       })
+
+      stopDrag(itemClone, ghost)
     },
     { once: true }
   )
