@@ -27,6 +27,7 @@ const DEFAULT_LANES = [
   }
 ]
 const lanesContainer = document.querySelector('[data-lanes-container]')
+
 let lanes = loadLanes()
 renderLanes()
 
@@ -102,20 +103,6 @@ function loadLanes() {
   return JSON.parse(lanesJson) || DEFAULT_LANES
 }
 
-function renderTasks() {
-  lanes.forEach(({ name, color, tasks }) => {
-    const lane = document.querySelector(`[data-lane-id=${name}]`)
-    const tasksHTML = tasks.map(createTaskHTML).join('')
-    lane.innerHTML = tasksHTML
-
-    const laneContainer = lane.parentElement
-    laneContainer.style.setProperty('--clr-modifier', color)
-
-    const colorBar = laneContainer.querySelector('[data-color-bar]')
-    colorBar.value = color
-  })
-}
-
 function renderLanes() {
   const lanesHTML = lanes.map(createLaneHTML).join('')
   lanesContainer.innerHTML = lanesHTML
@@ -131,8 +118,7 @@ function createTaskHTML(task) {
   </div>`
 }
 
-function createLaneHTML(lane) {
-  const { name, color, tasks } = lane
+function createLaneHTML({ name = '標題', color = 120, tasks = [] } = {}) {
   return `
   <div class="lane" style="--clr-modifier:${color};">
     <div class="lane__header">
@@ -158,8 +144,13 @@ function createLaneHTML(lane) {
 const fileInput = document.querySelector('#uploadJson')
 const downloadBtn = document.querySelector('#downloadJson')
 
-//上傳檔案
-fileInput.addEventListener('change', (e) => {
+//上傳
+fileInput.addEventListener('change', handleUpload)
+
+//下載
+downloadBtn.addEventListener('click', handleDownload)
+
+function handleUpload(params) {
   const file = fileInput.files[0]
   const reader = new FileReader()
 
@@ -198,11 +189,9 @@ fileInput.addEventListener('change', (e) => {
   })
 
   reader.readAsText(file)
-})
+}
 
-downloadBtn.addEventListener('click', downloadJSON)
-
-function downloadJSON() {
+function handleDownload() {
   const filename = 'trello_clone.json'
   const element = document.createElement('a')
 
@@ -217,29 +206,11 @@ function downloadJSON() {
   element.remove()
 }
 
-function assignment(result) {
-  var stack = Array.prototype.slice.call(arguments, 1)
-  var item
-  var key
-  while (stack.length) {
-    item = stack.shift()
-    for (key in item) {
-      if (item.hasOwnProperty(key)) {
-        if (
-          typeof result[key] === 'object' &&
-          result[key] &&
-          Object.prototype.toString.call(result[key]) !== '[object Array]'
-        ) {
-          if (typeof item[key] === 'object' && item[key] !== null) {
-            result[key] = assignment({}, result[key], item[key])
-          } else {
-            result[key] = item[key]
-          }
-        } else {
-          result[key] = item[key]
-        }
-      }
-    }
-  }
-  return result
+const addLaneBtn = document.querySelector('[data-add-lane]')
+
+addLaneBtn.addEventListener('click', addLane)
+
+function addLane() {
+  const laneHTML = createLaneHTML()
+  lanesContainer.innerHTML += laneHTML
 }
