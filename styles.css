@@ -22,10 +22,11 @@ body {
     Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   background-color: var(--clr-neutral-400);
-  background-image: url('https://images.unsplash.com/photo-1488998427799-e3362cec87c3?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  background-image: url('./images/background.webp');
   background-size: cover;
   background-repeat: no-repeat;
   background-blend-mode: multiply;
+  background-attachment: fixed;
   font-size: 2rem;
   min-height: 100vh;
 }
@@ -33,8 +34,11 @@ body {
 /* reset */
 h1,
 h2,
-p {
+p,
+ul,
+li {
   margin: 0;
+  padding: 0;
   font-weight: 400;
 }
 input,
@@ -57,7 +61,7 @@ button {
   padding: 1rem;
   max-width: 1200px;
   margin: auto;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   place-content: center;
 }
 
@@ -102,6 +106,7 @@ button {
   margin: 0.25rem 0;
   word-wrap: break-word;
   text-align: center;
+  font-size: 1.5rem;
 }
 
 .task-input {
@@ -241,4 +246,51 @@ button {
 
 .add:active {
   background-position: 50% -100%, 200% 50%, 50% 200%, -100% 50%;
+}
+
+.task {
+  position: relative;
+}
+
+.delete-btn {
+  position: absolute;
+  display: block;
+  display: grid;
+  height: 100%;
+  left: -6px;
+  top: 0;
+  /* transform: translateY(-50%); */
+}
+
+.ionicon.delete {
+  display: none;
+  color: hsla(0, 100%, 50%, 0.7);
+  width: 30px;
+  height: 30px;
+  margin: auto;
+}
+
+.ionicon.delete:hover {
+  fill: hsla(200, 100%, 50%, 0.7);
+}
+
+.tool-bar {
+  margin: 4rem 0 0rem;
+  padding: 1rem;
+}
+.tool-bar ul {
+  padding: 1rem 2rem;
+  max-width: 600px;
+  margin: 1rem auto;
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+
+  gap: 1rem;
+  list-style: none;
+}
+
+.tool-bar li {
+  cursor: pointer;
+  padding: 0 0.3em;
 }

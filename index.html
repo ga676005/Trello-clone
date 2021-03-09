@@ -13,8 +13,26 @@
 </head>
 
 <body>
-  <div class="lanes">
-    <div class="lane">
+  <header>
+    <nav class="tool-bar">
+      <ul>
+        <li>Add</li>
+        <li>Delete</li>
+        <li>
+          <button>
+            <label for="uploadJson">Upload</label>
+          </button>
+          <input type="file" name="upload" id="uploadJson" hidden accept="application/json">
+        </li>
+        <li>
+          <button id="downloadJson">下載</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  <div data-lanes-container class="lanes">
+
+    <!-- <div class="lane">
       <div class="lane__header">
         <h2 class="lane__title">
           待辦
@@ -61,7 +79,7 @@
         <input data-task-input class="task-input" type="text" placeholder="新增項目" />
         <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
-    </div>
+    </div> -->
     <!-- <div class="add-new-lane">
       <div class="add"></div>
     </div> -->
