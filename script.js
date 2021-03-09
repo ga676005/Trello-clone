@@ -4,26 +4,26 @@ import addGlobalEventListener from './utils/addGlobalEventListener.js'
 
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
-const DEFAULT_LANES = {
-  backlog: [{ id: generateUniqueString(5), text: 'Create your first task' }],
-  doing: [{ id: generateUniqueString(5), text: 'Pa games' }],
-  done: [{ id: generateUniqueString(5), text: 'Nothing' }]
-}
-const LANES = [
+const DEFAULT_LANES = [
   {
-    name: 'backlog',
-    color: 180,
-    tasks: [{ id: generateUniqueString(5), text: 'Create your first task' }]
+    name: '待辦',
+    color: 220,
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
   },
   {
-    name: 'doing',
-    color: 180,
-    tasks: [{ id: generateUniqueString(5), text: 'Pa games' }]
+    name: '進行中',
+    color: 0,
+    tasks: [
+      {
+        id: generateUniqueString(5),
+        text: '按著我移動到其他欄位中'
+      }
+    ]
   },
   {
-    name: 'done',
-    color: 180,
-    tasks: [{ id: generateUniqueString(5), text: 'Nothing' }]
+    name: '完成',
+    color: 150,
+    tasks: [{ id: generateUniqueString(5), text: '點右上角的圖標變換顏色' }]
   }
 ]
 
@@ -34,6 +34,7 @@ setupDragAndDrop(onDragComplete)
 
 addGlobalEventListener('submit', '[data-task-form]', (e) => {
   e.preventDefault()
+  e.target.classList.remove('show-add-button')
 
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = taskInput.value
@@ -41,7 +42,9 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
 
   const task = { id: generateUniqueString(5), text: taskText }
   const laneElement = e.target.closest('.lane').querySelector('[data-lane-id]')
-  lanes[laneElement.dataset.laneId].push(task)
+  const laneId = laneElement.dataset.laneId
+
+  lanes.find((i) => i.name === laneId).tasks.push(task)
 
   const taskElement = createTaskHTML(task)
   laneElement.innerHTML += taskElement
@@ -78,7 +81,7 @@ function saveLanes() {
 
 function loadLanes() {
   const lanesJson = localStorage.getItem(LANES_STORAGE_KEY)
-  return JSON.parse(lanesJson) || LANES
+  return JSON.parse(lanesJson) || DEFAULT_LANES
 }
 
 function renderTasks() {
@@ -102,13 +105,19 @@ function createTaskHTML(task) {
   </div>`
 }
 
-document.addEventListener('input', (e) => {
-  if (!e.target.matches('[data-color-bar]')) return
+// Change color
+addGlobalEventListener('input', '[data-color-bar]', (e) => {
   const lane = e.target.closest('.lane')
   const laneId = lane.querySelector('[data-lane-id]').dataset.laneId
   const colorValue = e.target.value
   lane.style.setProperty('--clr-modifier', colorValue)
-  console.log(lane)
   lanes.find((l) => l.name === laneId).color = colorValue
   saveLanes()
+})
+
+// Show adding task button
+addGlobalEventListener('input', '[data-task-input]', (e) => {
+  const input = e.target
+  const hasValue = input.value.length > 0
+  input.parentElement.classList.toggle('show-add-button', hasValue)
 })

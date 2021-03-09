@@ -6,57 +6,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Trello Clone</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
 
 <body>
   <div class="lanes">
-    <div class="lane" data-draggable>
-      <div class="header">
-        Backlog
+    <div class="lane">
+      <div class="lane__header">
+        <h2 class="lane__title">
+          待辦
+        </h2>
+        <button class="color-bar-toggler"></button>
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </div>
-      <div class="tasks" data-drop-zone data-lane-id="backlog">
+      <div class="tasks" data-drop-zone data-lane-id="待辦">
 
       </div>
-      <form data-task-form>
-        <input data-color-bar type="range" min="0" max="360" step="10">
+      <form data-task-form class="task-form">
+        <input data-task-input class="task-input" type="text" placeholder="新增項目" />
+        <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
     </div>
     <div class="lane">
-      <div class="header">
-        進行中
+      <div class="lane__header">
+        <h2 class="lane__title">
+          進行中
+        </h2>
+        <button class="color-bar-toggler"></button>
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </div>
-      <div class="tasks" data-drop-zone data-lane-id="doing">
+      <div class="tasks" data-drop-zone data-lane-id="進行中">
 
       </div>
-      <form data-task-form>
-        <input data-color-bar type="range" min="0" max="360" step="10">
+      <form data-task-form class="task-form">
+        <input data-task-input class="task-input" type="text" placeholder="新增項目" />
+        <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
     </div>
     <div class="lane">
-      <div class="header">
-        完成
+      <div class="lane__header">
+        <h2 class="lane__title">
+          完成
+        </h2>
+        <button class="color-bar-toggler"></button>
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </div>
-      <div class="tasks" data-drop-zone data-lane-id="done">
+      <div class="tasks" data-drop-zone data-lane-id="完成">
 
       </div>
-      <form>
-        <input data-color-bar type="range" min="0" max="360" step="10">
+      <form data-task-form class="task-form">
+        <input data-task-input class="task-input" type="text" placeholder="新增項目" />
+        <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
     </div>
+    <!-- <div class="add-new-lane">
+      <div class="add"></div>
+    </div> -->
   </div>
 
   <template id="lane-template">
     <div class="lane">
-      <div class="header">
-        完成
+      <div class="lane__header">
+        <h2 class="lane__title">
+          完成
+        </h2>
+        <button class="color-bar-toggler"></button>
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </div>
-      <div class="tasks" data-drop-zone data-lane-id="done">
+      <div class="tasks" data-drop-zone data-lane-id="完成">
 
       </div>
-      <form>
-        <input class="task-input" type="text" placeholder="Task Name" />
+      <form data-task-form class="task-form">
+        <input data-task-input class="task-input" type="text" placeholder="新增項目" />
+        <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
     </div>
   </template>
