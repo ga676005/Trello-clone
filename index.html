@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
   <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 
 <body>
   <div class="lanes">
-    <div class="lane">
+    <div class="lane" data-draggable>
       <div class="header">
         Backlog
       </div>
@@ -20,23 +20,37 @@
 
       </div>
       <form data-task-form>
-        <input data-task-input class="task-input" type="text" placeholder="Task Name" />
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </form>
     </div>
     <div class="lane">
       <div class="header">
-        Doing
+        進行中
       </div>
       <div class="tasks" data-drop-zone data-lane-id="doing">
 
       </div>
       <form data-task-form>
-        <input data-task-input class="task-input" type="text" placeholder="Task Name" />
+        <input data-color-bar type="range" min="0" max="360" step="10">
       </form>
     </div>
     <div class="lane">
       <div class="header">
-        Done
+        完成
+      </div>
+      <div class="tasks" data-drop-zone data-lane-id="done">
+
+      </div>
+      <form>
+        <input data-color-bar type="range" min="0" max="360" step="10">
+      </form>
+    </div>
+  </div>
+
+  <template id="lane-template">
+    <div class="lane">
+      <div class="header">
+        完成
       </div>
       <div class="tasks" data-drop-zone data-lane-id="done">
 
@@ -45,8 +59,7 @@
         <input class="task-input" type="text" placeholder="Task Name" />
       </form>
     </div>
-  </div>
-
+  </template>
 </body>
 
 </html>

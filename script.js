@@ -9,6 +9,23 @@ const DEFAULT_LANES = {
   doing: [{ id: generateUniqueString(5), text: 'Pa games' }],
   done: [{ id: generateUniqueString(5), text: 'Nothing' }]
 }
+const LANES = [
+  {
+    name: 'backlog',
+    color: 180,
+    tasks: [{ id: generateUniqueString(5), text: 'Create your first task' }]
+  },
+  {
+    name: 'doing',
+    color: 180,
+    tasks: [{ id: generateUniqueString(5), text: 'Pa games' }]
+  },
+  {
+    name: 'done',
+    color: 180,
+    tasks: [{ id: generateUniqueString(5), text: 'Nothing' }]
+  }
+]
 
 let lanes = loadLanes()
 renderTasks()
@@ -43,8 +60,8 @@ function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
   const endLaneId = endZone.dataset.laneId
 
   //找出欄位裡的tasks
-  const startLaneTasks = lanes[startLaneId]
-  const endLaneTasks = lanes[endLaneId]
+  const startLaneTasks = lanes.find((l) => l.name === startLaneId).tasks
+  const endLaneTasks = lanes.find((l) => l.name === endLaneId).tasks
 
   //找出被拖曳的task
   const task = startLaneTasks.find((t) => t.id === dragElement.id)
@@ -52,7 +69,6 @@ function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
   //把它從原本的陣列移除，用回傳的index插入到目標陣列中
   startLaneTasks.splice(startLaneTasks.indexOf(task), 1)
   endLaneTasks.splice(index, 0, task)
-
   saveLanes()
 }
 
@@ -62,14 +78,20 @@ function saveLanes() {
 
 function loadLanes() {
   const lanesJson = localStorage.getItem(LANES_STORAGE_KEY)
-  return JSON.parse(lanesJson) || DEFAULT_LANES
+  return JSON.parse(lanesJson) || LANES
 }
 
 function renderTasks() {
-  Object.entries(lanes).forEach(([laneId, tasks]) => {
-    const lane = document.querySelector(`[data-lane-id=${laneId}]`)
+  lanes.forEach(({ name, color, tasks }) => {
+    const lane = document.querySelector(`[data-lane-id=${name}]`)
     const tasksHTML = tasks.map(createTaskHTML).join('')
     lane.innerHTML = tasksHTML
+
+    const laneContainer = lane.parentElement
+    laneContainer.style.setProperty('--clr-modifier', color)
+
+    const colorBar = laneContainer.querySelector('[data-color-bar]')
+    colorBar.value = color
   })
 }
 
@@ -79,3 +101,14 @@ function createTaskHTML(task) {
     ${task.text}
   </div>`
 }
+
+document.addEventListener('input', (e) => {
+  if (!e.target.matches('[data-color-bar]')) return
+  const lane = e.target.closest('.lane')
+  const laneId = lane.querySelector('[data-lane-id]').dataset.laneId
+  const colorValue = e.target.value
+  lane.style.setProperty('--clr-modifier', colorValue)
+  console.log(lane)
+  lanes.find((l) => l.name === laneId).color = colorValue
+  saveLanes()
+})
