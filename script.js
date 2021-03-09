@@ -7,11 +7,13 @@ const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
 const DEFAULT_LANES = [
   {
+    id: '1',
     name: '待辦',
     color: 220,
     tasks: [{ id: '1', text: '在下方輸入內容新增項目' }]
   },
   {
+    id: '2',
     name: '進行中',
     color: 0,
     tasks: [
@@ -22,16 +24,12 @@ const DEFAULT_LANES = [
     ]
   },
   {
+    id: '3',
     name: '完成',
     color: 150,
     tasks: [{ id: '3', text: '點右上角的圖標變換顏色' }]
   }
 ]
-const DEFAULT_NEW_LANE = {
-  name: '標題',
-  color: undefined,
-  tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
-}
 
 const lanesContainer = document.querySelector('[data-lanes-container]')
 
@@ -46,14 +44,14 @@ setupDragAndDrop(onDragComplete)
  */
 function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
   //欄位名
-  const startLaneId = startZone.dataset.laneId
-  const endLaneId = endZone.dataset.laneId
+  const startLaneId = startZone.closest('[data-id]').dataset.id
+  const endLaneId = endZone.closest('[data-id]').dataset.id
 
   //找出欄位裡的tasks
-  const startLaneTasks = lanes.find((l) => l.name === startLaneId).tasks
-  const endLaneTasks = lanes.find((l) => l.name === endLaneId).tasks
-
+  const startLaneTasks = lanes.find((l) => l.id === startLaneId).tasks
+  const endLaneTasks = lanes.find((l) => l.id === endLaneId).tasks
   //找出被拖曳的task
+
   const task = startLaneTasks.find((t) => t.id === dragElement.id)
 
   //把它從原本的陣列移除，用回傳的index插入到目標陣列中
@@ -87,13 +85,11 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
 // Change color
 addGlobalEventListener('input', '[data-color-bar]', (e) => {
   const lane = e.target.closest('.lane')
-  console.log(lane)
   const laneId = lane.querySelector('[data-lane-id]').dataset.laneId
   const colorValue = e.target.value
   lane.style.setProperty('--clr-modifier', colorValue)
   lanes.find((l) => l.name === laneId).color = colorValue
   saveLanes()
-  console.log(lane)
 })
 
 // Show adding task button
@@ -127,9 +123,9 @@ function createTaskHTML(task) {
   </div>`
 }
 
-function createLaneHTML({ name, color, tasks } = {}) {
+function createLaneHTML({ id, name, color, tasks } = {}) {
   return `
-  <div class="lane" style="--clr-modifier:${color ?? randomInteger(1, 360)};">
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
@@ -191,7 +187,6 @@ function handleUpload() {
     })
 
     lanes = [...lanes, ...distinctLanes]
-    console.log(lanes)
 
     renderLanes()
     saveLanes()
@@ -220,6 +215,13 @@ const addLaneBtn = document.querySelector('[data-add-lane]')
 addLaneBtn.addEventListener('click', addLane)
 
 function addLane() {
+  const DEFAULT_NEW_LANE = {
+    id: generateUniqueString(5),
+    name: '標題',
+    color: randomInteger(1, 360),
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
+  }
+
   const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
   lanesContainer.innerHTML += laneHTML
   lanes = [...lanes, DEFAULT_NEW_LANE]
