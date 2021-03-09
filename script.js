@@ -87,11 +87,13 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
 // Change color
 addGlobalEventListener('input', '[data-color-bar]', (e) => {
   const lane = e.target.closest('.lane')
+  console.log(lane)
   const laneId = lane.querySelector('[data-lane-id]').dataset.laneId
   const colorValue = e.target.value
   lane.style.setProperty('--clr-modifier', colorValue)
   lanes.find((l) => l.name === laneId).color = colorValue
   saveLanes()
+  console.log(lane)
 })
 
 // Show adding task button
@@ -133,7 +135,7 @@ function createLaneHTML({ name, color, tasks } = {}) {
          ${name}
       </h2>
       <button class="color-bar-toggler"></button>
-      <input data-color-bar type="range" min="0" max="360" step="5" value=${color}>
+      <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
       <button class='delete-btn'>
         <svg xmlns='http://www.w3.org/2000/svg' class='ionicon delete' viewBox='0 0 512 512'><title>Close</title><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M368 368L144 144M368 144L144 368'/></svg>
       </button>

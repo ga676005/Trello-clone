@@ -55,7 +55,7 @@ button {
 
 .lanes {
   display: grid;
-  gap: 1rem;
+  gap: 2rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-auto-rows: minmax(300px, 1fr);
   padding: 1rem;
@@ -162,6 +162,7 @@ button {
   padding: 0;
   margin: 0;
   width: 100%;
+  z-index: -1;
 }
 
 .color-bar-toggler {
@@ -181,8 +182,10 @@ button {
   transform: scale(1.2);
 }
 
-.color-bar-toggler:focus + [data-color-bar] {
+.color-bar-toggler:focus + [data-color-bar],
+[data-color-bar]:focus {
   opacity: 1;
+  z-index: 1;
 }
 
 .task-form {
@@ -293,4 +296,34 @@ button {
 .tool-bar li {
   cursor: pointer;
   padding: 0 0.3em;
+}
+
+/* range slider */
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: hsl(var(--clr-secondary));
+  outline: none;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: hsl(var(--clr-primary));
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: hsl(var(--clr-primary));
+  cursor: pointer;
 }
