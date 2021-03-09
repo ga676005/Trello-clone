@@ -134,6 +134,6 @@ function setupDragItems(selectedItem, itemClone, ghost, e) {
  * @param {Object} offset 滑鼠點擊時對物件left和top的相對距離
  */
 function positionClone(itemClone, event, offset) {
-  itemClone.style.top = `${event.clientY - offset.y}px`
+  itemClone.style.top = `${event.pageY - offset.y}px`
   itemClone.style.left = `${event.clientX - offset.x}px`
 }
