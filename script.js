@@ -1,6 +1,7 @@
 import setupDragAndDrop from './dragAndDrop.js'
 import generateUniqueString from './utils/generateUniqueString.js'
 import addGlobalEventListener from './utils/addGlobalEventListener.js'
+import randomInteger from './utils/randomInteger.js'
 
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
@@ -26,6 +27,12 @@ const DEFAULT_LANES = [
     tasks: [{ id: '3', text: '點右上角的圖標變換顏色' }]
   }
 ]
+const DEFAULT_NEW_LANE = {
+  name: '標題',
+  color: undefined,
+  tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
+}
+
 const lanesContainer = document.querySelector('[data-lanes-container]')
 
 let lanes = loadLanes()
@@ -118,15 +125,15 @@ function createTaskHTML(task) {
   </div>`
 }
 
-function createLaneHTML({ name = '標題', color = 120, tasks = [] } = {}) {
+function createLaneHTML({ name, color, tasks } = {}) {
   return `
-  <div class="lane" style="--clr-modifier:${color};">
+  <div class="lane" style="--clr-modifier:${color ?? randomInteger(1, 360)};">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
       </h2>
       <button class="color-bar-toggler"></button>
-      <input data-color-bar type="range" min="0" max="360" step="10" value=${color}>
+      <input data-color-bar type="range" min="0" max="360" step="5" value=${color}>
       <button class='delete-btn'>
         <svg xmlns='http://www.w3.org/2000/svg' class='ionicon delete' viewBox='0 0 512 512'><title>Close</title><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M368 368L144 144M368 144L144 368'/></svg>
       </button>
@@ -150,7 +157,7 @@ fileInput.addEventListener('change', handleUpload)
 //下載
 downloadBtn.addEventListener('click', handleDownload)
 
-function handleUpload(params) {
+function handleUpload() {
   const file = fileInput.files[0]
   const reader = new FileReader()
 
@@ -211,6 +218,8 @@ const addLaneBtn = document.querySelector('[data-add-lane]')
 addLaneBtn.addEventListener('click', addLane)
 
 function addLane() {
-  const laneHTML = createLaneHTML()
+  const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
   lanesContainer.innerHTML += laneHTML
+  lanes = [...lanes, DEFAULT_NEW_LANE]
+  saveLanes()
 }
