@@ -167,14 +167,18 @@ function handleUpload() {
   reader.addEventListener('load', (e) => {
     const uploadData = JSON.parse(reader.result)
 
-    // 檢查同一個欄位但不同的task
     lanes.forEach((lane) => {
-      //找出同一個欄位
-      const uploadTasks = uploadData.find((entry) => entry.name === lane.name)?.tasks
+      // 找出同一個欄位
+      const uploadLane = uploadData.find((entry) => entry.id === lane.id)
 
-      // 找出不同的tasks
-      if (uploadTasks) {
-        const distinctTasks = uploadTasks.filter((uploadTask) => {
+      if (uploadLane) {
+        const { tasks } = uploadLane
+
+        // 用上傳的檔案覆蓋同一個欄位的稱稱 
+        lane.name = uploadLane.name
+
+        // 找出上傳檔案和目前檔案同一個欄位中，不同的tasks
+        const distinctTasks = tasks.filter((uploadTask) => {
           const sameTask = lane.tasks.some(
             (laneTask) => laneTask.id === uploadTask.id
           )
@@ -184,6 +188,7 @@ function handleUpload() {
         // 把不同的tasks加到原本的tasks後面
         lane.tasks = [...lane.tasks, ...distinctTasks]
       }
+
     })
 
     // 上傳檔案跟目前檔案不同的欄位

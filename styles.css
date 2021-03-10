@@ -59,7 +59,7 @@ button {
   gap: 2rem;
   grid-template-columns: repeat(auto-fit, minmax(250px, 350px));
   grid-auto-rows: minmax(300px, 1fr);
-  padding-top: 2rem;
+  padding: 2rem 0 5rem;
   max-width: 1200px;
   margin: auto;
   place-content: center;
