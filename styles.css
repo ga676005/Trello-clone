@@ -28,7 +28,6 @@ body {
   background-blend-mode: multiply;
   background-attachment: fixed;
   font-size: 2rem;
-  /* min-height: 100vh; */
 }
 
 /* reset */
@@ -61,10 +60,8 @@ button {
   grid-template-columns: repeat(auto-fit, minmax(250px, 350px));
   grid-auto-rows: minmax(300px, 1fr);
   padding-top: 2rem;
-
   max-width: 1200px;
   margin: auto;
-  /* min-height: 100vh; */
   place-content: center;
   overflow: hidden;
 }
@@ -82,7 +79,6 @@ button {
   border-radius: 0.5rem;
   box-shadow: var(--box-shadow);
   opacity: 0;
-  /* transform: translateY(-100%); */
 }
 
 .lane__title {
@@ -98,7 +94,6 @@ button {
 }
 
 .lane__header__form {
-  display: none;
   background-color: white;
   position: absolute;
   top: 5px;
@@ -106,11 +101,23 @@ button {
   left: 5px;
   bottom: 5px;
   text-align: center;
-  /* border-radius: 1rem; */
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.2s ease, z-index 0s 0.2s;
+  overflow: hidden;
 }
 
 .show-input .lane__header__form {
-  display: block;
+  transform-origin: left;
+  transition: transform 0.2s ease, z-index 0s;
+  transform: scaleX(1);
+  opacity: 1;
+  z-index: 1;
+}
+
+.show-input .lane__header__form input {
+  opacity: 1;
 }
 
 .form-group {
@@ -131,6 +138,8 @@ button {
   grid-row-start: 1;
   grid-column-start: 1;
   text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
 }
 
 .tasks {
@@ -315,7 +324,6 @@ header {
   top: 0;
   margin-bottom: 2rem;
   padding: 1.5rem 0;
-  /* background-color: black; */
   z-index: 100;
   background-color: hsla(0, 0%, 0%, 0);
   transition: background-color 0.5s linear;

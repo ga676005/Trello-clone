@@ -226,7 +226,7 @@ addLaneBtn.addEventListener('click', addLane)
 function addLane() {
   const DEFAULT_NEW_LANE = {
     id: generateUniqueString(5),
-    name: '標題',
+    name: '自訂標題',
     color: randomInteger(1, 360),
     tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }],
     // style: "transform: scale(0);"
@@ -271,6 +271,11 @@ addGlobalEventListener("click", "[data-delete-lane]", e => {
   setTimeout(() => {
     lane.remove()
   }, 500);
+})
+
+// make toolbar labels clickable
+addGlobalEventListener('click', ".toolbar__list-item label", e => {
+  e.target.parentElement.querySelector('button').click()
 })
 
 const deleteBtn = document.querySelector('[data-delete-mode]')
@@ -321,7 +326,7 @@ function animateLoading() {
   })
 }
 
-// double click to change title
+// show change title input
 document.addEventListener('dblclick', e => {
   const header = e.target.closest('.lane__header')
   if (!header) return
