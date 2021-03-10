@@ -60,12 +60,13 @@ button {
   gap: 2rem;
   grid-template-columns: repeat(auto-fit, minmax(250px, 350px));
   grid-auto-rows: minmax(300px, 1fr);
-  padding: 1rem;
+  padding-top: 2rem;
+
   max-width: 1200px;
   margin: auto;
   /* min-height: 100vh; */
   place-content: center;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 .lane {
@@ -94,6 +95,42 @@ button {
   color: white;
   padding: 0.25rem;
   text-transform: uppercase;
+}
+
+.lane__header__form {
+  display: none;
+  background-color: white;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  left: 5px;
+  bottom: 5px;
+  text-align: center;
+  /* border-radius: 1rem; */
+}
+
+.show-input .lane__header__form {
+  display: block;
+}
+
+.form-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.form-group button {
+  justify-self: right;
+  grid-column: 1;
+  grid-row-start: 1;
+  color: green;
+}
+
+.lane__header__form input {
+  width: 100%;
+  grid-row-start: 1;
+  grid-column-start: 1;
+  text-align: center;
 }
 
 .tasks {
@@ -161,13 +198,13 @@ button {
 
 [data-color-bar] {
   position: absolute;
-  top: -2rem;
+  top: -1.5rem;
   left: 0;
   opacity: 0;
   padding: 0;
   margin: 0;
   width: 100%;
-  z-index: -1;
+  pointer-events: none;
 }
 
 .color-bar-toggler {
@@ -191,6 +228,7 @@ button {
 [data-color-bar]:focus {
   opacity: 1;
   z-index: 1;
+  pointer-events: initial;
 }
 
 .task-form {

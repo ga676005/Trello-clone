@@ -132,6 +132,14 @@ function createLaneHTML({ id, name, color, tasks, style } = {}) {
       <button class="color-bar-toggler"></button>
       <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
       <ion-icon data-delete-lane class="delete-btn" name="close-circle"></ion-icon>
+      <form class="lane__header__form">
+        <div class="form-group">
+          <input type="text" data-change-title-input autoComplete="off" placeholder="請輸入...">
+          <button class="submit-btn" type="submit">
+            <ion-icon name="checkmark-circle"></ion-icon>
+          </button>
+        </div>
+      </form>
     </div>
     <div class="tasks" data-drop-zone data-lane-id="${name}">
       ${tasks.map(createTaskHTML).join('')}
@@ -274,10 +282,9 @@ deleteBtn.addEventListener('click', e => {
   deleteBtn.nextElementSibling.textContent = isDeleteMode ? "解除刪除模式" : "進入刪除模式"
 })
 
-const header = document.querySelector('header')
-
+// scroll and add background color to header
 window.addEventListener('scroll', e => {
-  const isScrollDown = window.scrollY > header.getBoundingClientRect().height
+  const isScrollDown = window.scrollY > 50
   document.body.classList.toggle('scroll-down', isScrollDown)
 })
 
@@ -313,3 +320,40 @@ function animateLoading() {
     }
   })
 }
+
+// double click to change title
+document.addEventListener('dblclick', e => {
+  const header = e.target.closest('.lane__header')
+  if (!header) return
+  header.classList.add('show-input')
+  const input = header.querySelector('[data-change-title-input]')
+  const title = header.querySelector('.lane__title')
+
+  input.value = title.textContent.trim()
+})
+
+// change lane title
+addGlobalEventListener('submit', '.lane__header__form', e => {
+  e.preventDefault()
+  const text = e.target.querySelector('[data-change-title-input]').value
+  if (text === "") return
+
+  const header = e.target.closest('.lane__header')
+  const title = header.querySelector('.lane__title')
+  const originalName = title.textContent.trim()
+
+  title.textContent = text
+  header.classList.remove('show-input')
+
+  const laneContainer = header.closest('.lane')
+  const lane = laneContainer.querySelector('.tasks')
+
+  lane.dataset.laneId = text
+
+  lanes.find(l => l.name === originalName).name = text
+  saveLanes()
+})
+
+
+
+
