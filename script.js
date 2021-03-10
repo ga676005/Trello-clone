@@ -121,9 +121,9 @@ function createTaskHTML({ id, text } = {}) {
   </div>`
 }
 
-function createLaneHTML({ id, name, color, tasks } = {}) {
+function createLaneHTML({ id, name, color, tasks, style } = {}) {
   return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};">
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ""}">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
@@ -206,6 +206,7 @@ function handleDownload() {
   element.remove()
 }
 
+// add lane
 const addLaneBtn = document.querySelector('[data-add-lane]')
 
 addLaneBtn.addEventListener('click', addLane)
@@ -215,17 +216,23 @@ function addLane() {
     id: generateUniqueString(5),
     name: '標題',
     color: randomInteger(1, 360),
-    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }],
+    // style: "transform: scale(0);"
   }
 
   const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
   lanesContainer.innerHTML += laneHTML
+  lanesContainer.lastElementChild.style.transform = "scale(0)"
+  setTimeout(() => {
+    lanesContainer.lastElementChild.style.transform = "scale(1)"
+  }, 0);
+
   lanes = [...lanes, DEFAULT_NEW_LANE]
   saveLanes()
 }
 
 
-
+// delete
 addGlobalEventListener("click", "[data-delete-task]", e => {
   const $task = e.target.closest('.task')
   const $lane = e.target.closest('.lane')
@@ -253,4 +260,11 @@ deleteBtn.addEventListener('click', e => {
   const isDeleteMode = document.body.classList.contains('delete-mode')
 
   deleteBtn.nextElementSibling.textContent = isDeleteMode ? "解除刪除模式" : "進入刪除模式"
+})
+
+const header = document.querySelector('header')
+
+window.addEventListener('scroll', e => {
+  const isScrollDown = window.scrollY > header.getBoundingClientRect().height
+  document.body.classList.toggle('scroll-down', isScrollDown)
 })
