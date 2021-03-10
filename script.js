@@ -35,6 +35,7 @@ const lanesContainer = document.querySelector('[data-lanes-container]')
 
 let lanes = loadLanes()
 renderLanes()
+animateLoading()
 
 setupDragAndDrop(onDragComplete)
 
@@ -161,19 +162,20 @@ function handleUpload() {
     // 檢查同一個欄位但不同的task
     lanes.forEach((lane) => {
       //找出同一個欄位
-      const uploadTasks = uploadData.find((entry) => entry.name === lane.name)
-        .tasks
+      const uploadTasks = uploadData.find((entry) => entry.name === lane.name)?.tasks
 
       // 找出不同的tasks
-      const distinctTasks = uploadTasks.filter((uploadTask) => {
-        const sameTask = lane.tasks.some(
-          (laneTask) => laneTask.id === uploadTask.id
-        )
-        return sameTask ? false : true
-      })
+      if (uploadTasks) {
+        const distinctTasks = uploadTasks.filter((uploadTask) => {
+          const sameTask = lane.tasks.some(
+            (laneTask) => laneTask.id === uploadTask.id
+          )
+          return sameTask ? false : true
+        })
 
-      // 把不同的tasks加到原本的tasks後面
-      lane.tasks = [...lane.tasks, ...distinctTasks]
+        // 把不同的tasks加到原本的tasks後面
+        lane.tasks = [...lane.tasks, ...distinctTasks]
+      }
     })
 
     // 上傳檔案跟目前檔案不同的欄位
@@ -185,6 +187,8 @@ function handleUpload() {
     lanes = [...lanes, ...distinctLanes]
 
     renderLanes()
+    animateLoading()
+
     saveLanes()
   })
 
@@ -222,10 +226,10 @@ function addLane() {
 
   const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
   lanesContainer.innerHTML += laneHTML
-  lanesContainer.lastElementChild.style.transform = "scale(0)"
-  setTimeout(() => {
-    lanesContainer.lastElementChild.style.transform = "scale(1)"
-  }, 0);
+
+  const lane = lanesContainer.lastElementChild
+  animateAddLane(lane)
+
 
   lanes = [...lanes, DEFAULT_NEW_LANE]
   saveLanes()
@@ -238,19 +242,27 @@ addGlobalEventListener("click", "[data-delete-task]", e => {
   const $lane = e.target.closest('.lane')
 
   const lane = lanes.find(l => l.id === $lane.dataset.id)
-  lane.tasks = lane.tasks.filter(t => {
-    console.log(t.id, $task.id)
-    return t.id !== $task.id
-  })
+  lane.tasks = lane.tasks.filter(t => t.id !== $task.id)
   saveLanes()
-  $task.remove()
+
+  animateDeleteTask($task)
+
+  setTimeout(() => {
+    $task.remove()
+  }, 500);
+
 })
 
 addGlobalEventListener("click", "[data-delete-lane]", e => {
   const lane = e.target.closest('.lane')
   lanes = lanes.filter(l => l.id !== lane.dataset.id)
   saveLanes()
-  lane.remove()
+
+  animateDeleteLane(lane)
+
+  setTimeout(() => {
+    lane.remove()
+  }, 500);
 })
 
 const deleteBtn = document.querySelector('[data-delete-mode]')
@@ -268,3 +280,36 @@ window.addEventListener('scroll', e => {
   const isScrollDown = window.scrollY > header.getBoundingClientRect().height
   document.body.classList.toggle('scroll-down', isScrollDown)
 })
+
+
+function animateDeleteLane(lane) {
+  gsap.to(lane, { opacity: 0, duration: .5, ease: Power4.easeOut, })
+  gsap.to(lane, { rotation: 30, duration: .5, ease: Power4.easeOut, })
+  gsap.to(lane, { x: 150, y: 300, duration: 2, ease: Power4.easeOut, })
+}
+
+function animateDeleteTask($task) {
+  gsap.to($task, { x: 500, duration: .4, ease: "elastic.in(1.5, 0.75)" })
+  gsap.to($task, { y: "random(20,-20)", duration: .2, ease: "elastic.in(1.5, 0.75)" })
+  gsap.to($task, { y: "random(20,-20)", duration: .2, ease: "elastic.in(1.5, 0.75)" })
+}
+
+function animateAddLane(lane) {
+  gsap.set('.toolbar', { pointerEvents: " none " })
+  gsap.set(lane, { scale: 0.5 })
+  gsap.to(lane, {
+    scale: 1, duration: 0.3, y: 0, opacity: 1, ease: "back.out(2)", onComplete: function () {
+      document.querySelector('.toolbar').style.pointerEvents = "unset"
+    }
+  })
+}
+
+function animateLoading() {
+  gsap.set('.lane', { y: '-500' })
+  gsap.set('.toolbar', { pointerEvents: " none " })
+  gsap.to('.lane', {
+    duration: .4, ease: "elastic.out(1, 0.3)", opacity: 1, y: 0, stagger: .35, delay: .5, onComplete: function () {
+      document.querySelector('.toolbar').style.pointerEvents = "unset"
+    }
+  })
+}
