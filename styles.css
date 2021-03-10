@@ -53,10 +53,12 @@ button {
   cursor: pointer;
 }
 
+/* #region lane */
+
 .lanes {
   display: grid;
   gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 350px));
   grid-auto-rows: minmax(300px, 1fr);
   padding: 1rem;
   max-width: 1200px;
@@ -224,79 +226,117 @@ button {
   opacity: 0.9;
 }
 
-.add-new-lane {
-  display: grid;
-}
-
-.add {
-  display: block;
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(90deg, rgb(43, 146, 11), rgb(43, 146, 11)),
-    linear-gradient(90deg, rgb(43, 146, 11), rgb(43, 146, 11)),
-    linear-gradient(90deg, rgb(43, 146, 11), rgb(43, 146, 11)),
-    linear-gradient(90deg, rgb(43, 146, 11), rgb(43, 146, 11));
-  background-repeat: no-repeat;
-  background-size: 30px 50px, 50px 30px, 30px 50px, 50px 30px;
-  background-position: top center, right center, bottom center, left center;
-  margin: auto;
-  transition: background-position 0.3s ease-out;
-}
-
-.add:hover {
-  opacity: 0.8;
-}
-
-.add:active {
-  background-position: 50% -100%, 200% 50%, 50% 200%, -100% 50%;
-}
-
+/* delete button */
 .task {
   position: relative;
 }
 
 .delete-btn {
+  cursor: pointer;
+  position: absolute;
+  display: none;
+  left: 50%;
+  right: 0;
+  bottom: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  color: black;
+}
+
+.delete-btn::after {
+  content: '';
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   position: absolute;
   display: block;
-  display: grid;
-  height: 100%;
-  left: -6px;
-  top: 0;
-  /* transform: translateY(-50%); */
+  width: 2rem;
+  height: 2rem;
+  border-radius: 100%;
+  z-index: -1;
+  background-color: rgba(255, 0, 0, 0.952);
 }
 
-.ionicon.delete {
-  display: none;
-  color: hsla(0, 100%, 50%, 0.7);
-  width: 30px;
-  height: 30px;
-  margin: auto;
+.delete-mode .task:hover .delete-btn {
+  display: block;
 }
 
-.ionicon.delete:hover {
-  fill: hsla(200, 100%, 50%, 0.7);
+.delete-mode .lane__header:hover .delete-btn {
+  display: block;
 }
 
-.tool-bar {
-  margin: 4rem 0 0rem;
+/* #endregion */
+
+/* #region toolbar */
+header {
   padding: 1rem;
 }
-.tool-bar ul {
-  padding: 1rem 2rem;
+
+.toolbar {
+  margin: 4rem 0 0rem;
+}
+.toolbar ul {
   max-width: 600px;
   margin: 1rem auto;
   display: flex;
   justify-content: space-between;
-  background-color: white;
-
-  gap: 1rem;
   list-style: none;
 }
 
-.tool-bar li {
+.toolbar__list-item {
+  position: relative;
   cursor: pointer;
-  padding: 0 0.3em;
+  display: grid;
+  place-content: center;
 }
+
+.toolbar__list-item > button {
+  display: grid;
+  place-content: center;
+  font-size: min(15vw, 5rem);
+  color: hsl(0, 0%, 100%);
+}
+.toolbar__list-item > label {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  font-size: 1.3rem;
+  transform: scale(0.5) translateX(-50%);
+  opacity: 0;
+  transition: transform, opacity, color;
+  transition-duration: 0.3s;
+  transform-origin: left;
+}
+.toolbar__list-item:hover > label {
+  transform: scale(1) translate(-50%, 50%);
+  opacity: 1;
+  color: hsl(0, 0%, 100%);
+}
+
+.delete-mode-text {
+  width: max-content;
+}
+
+.delete-mode .delete-mode-text {
+  opacity: 1;
+  transform: scale(1) translate(-50%, 50%);
+  color: hsl(0, 0%, 100%);
+}
+
+.add-circle {
+  color: hsl(118, 88%, 68%);
+}
+.trash {
+  color: hsl(0, 88%, 68%);
+}
+.cloud-upload {
+  color: hsl(178, 88%, 68%);
+}
+.cloud-download {
+  color: hsl(66, 88%, 68%);
+}
+/* #endregion */
 
 /* range slider */
 .slider {

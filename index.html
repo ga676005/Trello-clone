@@ -12,28 +12,41 @@
   <script src="script.js" defer></script>
 </head>
 
-<body>
+<body class="">
   <header>
-    <nav class="tool-bar">
+    <nav class="toolbar">
       <ul>
-        <li>
-          <button data-add-lane>新增</button>
-        </li>
-        <li>
-          <button data-delete-mode>刪除</button>
-        </li>
-        <li>
-          <button>
-            <label for="uploadJson">上傳</label>
+        <li class="toolbar__list-item">
+          <button data-add-lane>
+            <ion-icon class="add-circle" name="add-circle"></ion-icon>
           </button>
+          <label>新增</label>
+        </li>
+        <li class="toolbar__list-item">
+          <button data-delete-mode>
+            <ion-icon class="trash" name="trash"></ion-icon>
+          </button>
+          <label class="delete-mode-text">進入刪除模式</label>
+        </li>
+        <li class="toolbar__list-item">
+          <button>
+            <label for="uploadJson">
+              <ion-icon class="cloud-upload" name="cloud-upload"></ion-icon>
+            </label>
+          </button>
+          <label class="upload-label">上傳</label>
           <input type="file" name="upload" id="uploadJson" hidden accept="application/json">
         </li>
-        <li>
-          <button id="downloadJson">下載</button>
+        <li class="toolbar__list-item">
+          <button id="downloadJson">
+            <ion-icon class="cloud-download" name="cloud-download"></ion-icon>
+          </button>
+          <label>下載</label>
         </li>
       </ul>
     </nav>
   </header>
+
   <div data-lanes-container class="lanes">
 
     <!-- <div class="lane">
@@ -84,9 +97,7 @@
         <button data-submit-task-btn class="submit-task-btn"></button>
       </form>
     </div> -->
-    <!-- <div class="add-new-lane">
-      <div class="add"></div>
-    </div> -->
+
   </div>
 
   <template id="lane-template">
@@ -107,6 +118,7 @@
       </form>
     </div>
   </template>
+  <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
 </body>
 
 </html>

@@ -113,13 +113,11 @@ function renderLanes() {
   lanesContainer.innerHTML = lanesHTML
 }
 
-function createTaskHTML(task) {
+function createTaskHTML({ id, text } = {}) {
   return `
-  <div class="task" data-draggable id=${task.id}>
-    <button class='delete-btn'>
-      <svg xmlns='http://www.w3.org/2000/svg' class='ionicon delete' viewBox='0 0 512 512'><title>Close</title><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M368 368L144 144M368 144L144 368'/></svg>
-    </button>
-    ${task.text}
+  <div class="task" data-draggable id=${id}>
+    <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
+    ${text}
   </div>`
 }
 
@@ -132,9 +130,7 @@ function createLaneHTML({ id, name, color, tasks } = {}) {
       </h2>
       <button class="color-bar-toggler"></button>
       <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
-      <button class='delete-btn'>
-        <svg xmlns='http://www.w3.org/2000/svg' class='ionicon delete' viewBox='0 0 512 512'><title>Close</title><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='32' d='M368 368L144 144M368 144L144 368'/></svg>
-      </button>
+      <ion-icon data-delete-lane class="delete-btn" name="close-circle"></ion-icon>
     </div>
     <div class="tasks" data-drop-zone data-lane-id="${name}">
       ${tasks.map(createTaskHTML).join('')}
@@ -227,3 +223,34 @@ function addLane() {
   lanes = [...lanes, DEFAULT_NEW_LANE]
   saveLanes()
 }
+
+
+
+addGlobalEventListener("click", "[data-delete-task]", e => {
+  const $task = e.target.closest('.task')
+  const $lane = e.target.closest('.lane')
+
+  const lane = lanes.find(l => l.id === $lane.dataset.id)
+  lane.tasks = lane.tasks.filter(t => {
+    console.log(t.id, $task.id)
+    return t.id !== $task.id
+  })
+  saveLanes()
+  $task.remove()
+})
+
+addGlobalEventListener("click", "[data-delete-lane]", e => {
+  const lane = e.target.closest('.lane')
+  lanes = lanes.filter(l => l.id !== lane.dataset.id)
+  saveLanes()
+  lane.remove()
+})
+
+const deleteBtn = document.querySelector('[data-delete-mode]')
+
+deleteBtn.addEventListener('click', e => {
+  document.body.classList.toggle('delete-mode')
+  const isDeleteMode = document.body.classList.contains('delete-mode')
+
+  deleteBtn.nextElementSibling.textContent = isDeleteMode ? "解除刪除模式" : "進入刪除模式"
+})
