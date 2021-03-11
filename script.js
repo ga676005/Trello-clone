@@ -29,9 +29,6 @@ const DEFAULT_LANES = [
 
 const lanesContainer = document.querySelector('[data-lanes-container]')
 
-let lanes = loadLanes()
-renderLanes()
-
 setupDragAndDrop(onDragComplete)
 
 /**
@@ -50,13 +47,15 @@ function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
 
   const task = startLaneTasks.find((t) => t.id === dragElement.dataset.taskId)
 
-  //把它從原本的陣列移除，用回傳的index插入到目標陣列中
-  startLaneTasks.splice(startLaneTasks.indexOf(task), 1)
-  endLaneTasks.splice(index, 0, task)
-  saveLanes()
+  if (task) {
+    //把它從原本的陣列移除，用回傳的index插入到目標陣列中
+    startLaneTasks.splice(startLaneTasks.indexOf(task), 1)
+    endLaneTasks.splice(index, 0, task)
+    saveLanes()
+  }
 }
 
-// form submit
+// add new task
 addGlobalEventListener('submit', '[data-task-form]', (e) => {
   e.preventDefault()
   e.target.classList.remove('show-add-button')
@@ -64,14 +63,13 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = taskInput.value
   if (taskText === '') return
-
-  const task = { id: generateUniqueString(5), text: taskText }
+  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '' }
   const laneElement = e.target.closest('.lane').querySelector('[data-lane-id]')
   const laneId = laneElement.dataset.laneId
 
-  lanes.find((i) => i.name === laneId).tasks.push(task)
+  lanes.find((i) => i.name === laneId).tasks.push(newTask)
 
-  const taskElement = createTaskHTML(task)
+  const taskElement = createTaskHTML(newTask)
   laneElement.innerHTML += taskElement
   taskInput.value = ''
 
@@ -370,7 +368,7 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
 
   input.value = taskTitle
-  textarea.textContent = taskNotes
+  textarea.value = taskNotes
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
@@ -381,7 +379,18 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
       btn.classList.add('is-selected')
     }
   })
+  showPositionOrderNumber(tooltipPosition, buttons)
 })
+
+//Show tooltip position order number besides arrows
+function showPositionOrderNumber(tooltipPosition, buttons) {
+  tooltipPosition.forEach((position, index) => {
+    const btn = buttons.find((b) => b.dataset.position === position)
+    if (btn) {
+      btn.dataset.order = index + 1
+    }
+  })
+}
 
 addGlobalEventListener('click', '.arrow', (e) => {
   const button = e.target
@@ -399,12 +408,7 @@ addGlobalEventListener('click', '.arrow', (e) => {
     ? [...tooltipPosition, positionName]
     : tooltipPosition.filter((position) => position !== positionName)
 
-  tooltipPosition.forEach((position, index) => {
-    const btn = buttons.find((b) => b.dataset.position === position)
-    if (btn) {
-      btn.dataset.order = index + 1
-    }
-  })
+  showPositionOrderNumber(tooltipPosition, buttons)
 
   task.dataset.positions = tooltipPosition.join('|')
 })
@@ -455,7 +459,7 @@ function createEditFormHTML() {
   <form data-edit-task-form class="task-edit-form">
     <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
     <div class="task-edit-form__notes-settings">
-      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增備註&#10;2. 選擇提示框的位置，如果空間不夠它會自己想辦法" autoComplete="off"></textarea>
+      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增備註&#10;2. 選擇提示框的位置順序" autoComplete="off"></textarea>
       <button type="button" data-position="top" class="arrow arrow-up">&uarr;</button>
       <button type="button" data-position="left" class="arrow arrow-left">&larr;</button>
       <button type="button" data-position="right" class="arrow arrow-right">&rarr;</button>
@@ -470,9 +474,10 @@ function createEditFormHTML() {
 }
 
 // Create lane HTML
-function createLaneHTML({ id, name, color, tasks, style } = {}) {
+function createLaneHTML({ id, name, color, tasks = '' } = {}) {
+  if (tasks == null) return
   return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ''}">
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};}">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
@@ -501,3 +506,6 @@ function createLaneHTML({ id, name, color, tasks, style } = {}) {
     </form>
   </div>`
 }
+
+let lanes = loadLanes()
+renderLanes()
