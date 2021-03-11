@@ -11,24 +11,19 @@ const DEFAULT_LANES = [
     id: '1',
     name: '待辦',
     color: 220,
-    tasks: [{ id: '1', text: '在下方輸入內容新增項目' }]
+    tasks: [{ id: '1', text: '在下方輸入內容新增項目', notes: null }]
   },
   {
     id: '2',
     name: '進行中',
     color: 0,
-    tasks: [
-      {
-        id: '2',
-        text: '按著我移動到其他欄位中'
-      }
-    ]
+    tasks: [{ id: '2', text: '按著我移動到其他欄位中', notes: null }]
   },
   {
     id: '3',
     name: '完成',
     color: 150,
-    tasks: [{ id: '3', text: '點右上角的圖標變換顏色' }]
+    tasks: [{ id: '3', text: '點右上角的圖標變換顏色', notes: null }]
   }
 ]
 
@@ -115,53 +110,6 @@ function renderLanes() {
   if (lanesContainer.children.length > 0) animateLoading()
 }
 
-// Create task HTML
-function createTaskHTML({ id, text } = {}) {
-  return `
-  <div class="task" data-draggable data-task-id=${id} data-tooltip="test where is my color" data-spacing="15" data-positions="bottom">
-    <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
-    <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
-    <p class="task-title">${text}</p>
-  </div>`
-}
-
-// Create lane HTML
-function createLaneHTML({ id, name, color, tasks, style } = {}) {
-  return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ''}">
-    <div class="lane__header">
-      <h2 class="lane__title">
-         ${name}
-      </h2>
-      <button class="color-bar-toggler"></button>
-      <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
-      <ion-icon data-delete-lane class="delete-btn" name="close-circle"></ion-icon>
-      <form class="lane__header__form">
-        <div class="form-group">
-          <input type="text" data-change-title-input autoComplete="off" placeholder="請輸入...">
-          <button class="submit-btn" type="submit">
-            <ion-icon name="checkmark-circle"></ion-icon>
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="tasks " data-drop-zone data-lane-id="${name}">
-      ${tasks.map(createTaskHTML).join('')}
-      <div class="edit-task-form-container">
-        <form data-edit-task-form class="task-edit-form">
-          <input type="text" name="task-title" class="edit-task-input"  placeholder="修改標題">
-          <textarea name="task-notes" class="edit-task-notes" placeholder="新增備註..."></textarea>
-          <button class="edit-task-submit-btn" type="submit">OK!</button>
-        </form>
-      </div>
-    </div>
-    <form data-task-form class="task-form">
-      <input data-task-input class="task-input" type="text" placeholder="新增項目" />
-      <button data-submit-task-btn class="submit-task-btn"></button>
-    </form>
-  </div>`
-}
-
 // add lane
 const addLaneBtn = document.querySelector('[data-add-lane]')
 
@@ -213,6 +161,7 @@ function handleUpload() {
           const uploadTask = tasks.find((uploadTask) => uploadTask.id === localTask.id)
           if (uploadTask) {
             localTask.text = uploadTask.text
+            localTask.notes = uploadTask.notes
           }
         })
 
@@ -417,17 +366,55 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const input = tasksContainer.querySelector('.edit-task-input')
   const textarea = tasksContainer.querySelector('.edit-task-notes')
   const taskTitle = task.querySelector('.task-title').textContent.trim()
-  input.value = taskTitle
+  const taskNotes = task.dataset.tooltip
+  const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
 
+  input.value = taskTitle
+  textarea.textContent = taskNotes
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
+
+  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
+  buttons.forEach((btn) => {
+    if (tooltipPosition.some((p) => p === btn.dataset.position)) {
+      btn.classList.add('is-selected')
+    }
+  })
+})
+
+addGlobalEventListener('click', '.arrow', (e) => {
+  const button = e.target
+  const buttons = [...button.parentElement.querySelectorAll('.arrow')]
+  const positionName = button.dataset.position.trim()
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  let tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
+
+  button.classList.toggle('is-selected')
+  const isSelected = button.classList.contains('is-selected')
+
+  tooltipPosition = isSelected
+    ? [...tooltipPosition, positionName]
+    : tooltipPosition.filter((position) => position !== positionName)
+
+  tooltipPosition.forEach((position, index) => {
+    const btn = buttons.find((b) => b.dataset.position === position)
+    if (btn) {
+      btn.dataset.order = index + 1
+    }
+  })
+
+  task.dataset.positions = tooltipPosition.join('|')
 })
 
 addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   e.preventDefault()
   const input = e.target.elements['task-title']
   const textarea = e.target.elements['task-notes']
+  const buttons = [...e.target.querySelectorAll('.arrow')]
+  buttons.forEach((b) => b.classList.remove('is-selected'))
   const tasksContainer = e.target.closest('.tasks')
   const taskId = tasksContainer.dataset.taskId
   const $lane = tasksContainer.closest('.lane')
@@ -435,20 +422,82 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 
   const newTitle = input.value
   if (newTitle.trim() === '') return
-
+  const newNotes = textarea.value
+  $task.dataset.tooltip = newNotes.trim()
   $task.querySelector('.task-title').textContent = newTitle
-  let tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
+
+  const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
   const task = tasks.find((t) => t.id === taskId)
+
   task.text = newTitle
+  task.notes = newNotes
+  task.tooltipPosition = $task.dataset.positions
+
   saveLanes()
 
   tasksContainer.classList.remove('show-edit-form')
 })
 
-/**
- * <form data-edit-task-form class="task-edit-form">
-      <input type="text" class="edit-task-input"  placeholder="修改標題">
-      <textarea class="edit-task-notes" placeholder="新增備註..."></textarea>
-      <button class="edit-task-submit-btn" type="submit">OK!</button>
-   </form>
- */
+// Create task HTML
+function createTaskHTML({ id, text, notes = null, tooltipPosition = '' } = {}) {
+  return `
+  <div class="task" data-draggable data-task-id=${id} data-tooltip="${
+    notes ?? ''
+  }" data-spacing="15" data-positions=${tooltipPosition}>
+    <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
+    <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
+    <p class="task-title">${text}</p>
+  </div>`
+}
+
+function createEditFormHTML() {
+  return `
+  <form data-edit-task-form class="task-edit-form">
+    <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
+    <div class="task-edit-form__notes-settings">
+      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增備註&#10;2. 選擇提示框的位置，如果空間不夠它會自己想辦法" autoComplete="off"></textarea>
+      <button type="button" data-position="top" class="arrow arrow-up">&uarr;</button>
+      <button type="button" data-position="left" class="arrow arrow-left">&larr;</button>
+      <button type="button" data-position="right" class="arrow arrow-right">&rarr;</button>
+      <button type="button" data-position="bottom" class="arrow arrow-down">&darr;</button>
+      <button type="button" data-position="topLeft" class="arrow arrow-nw">&nwarr;</button>
+      <button type="button" data-position="topRight" class="arrow arrow-ne">&nearr;</button>
+      <button type="button" data-position="bottomLeft" class="arrow arrow-sw">&swarr;</button>
+      <button type="button" data-position="bottomRight" class="arrow arrow-se">&searr;</button>
+    </div>
+    <button class="edit-task-submit-btn" type="submit">OK!</button>
+  </form>`
+}
+
+// Create lane HTML
+function createLaneHTML({ id, name, color, tasks, style } = {}) {
+  return `
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ''}">
+    <div class="lane__header">
+      <h2 class="lane__title">
+         ${name}
+      </h2>
+      <button class="color-bar-toggler"></button>
+      <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
+      <ion-icon data-delete-lane class="delete-btn" name="close-circle"></ion-icon>
+      <form class="lane__header__form">
+        <div class="form-group">
+          <input type="text" data-change-title-input autoComplete="off" placeholder="請輸入...">
+          <button class="submit-btn" type="submit">
+            <ion-icon name="checkmark-circle"></ion-icon>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="tasks " data-drop-zone data-lane-id="${name}">
+      ${tasks.map(createTaskHTML).join('')}
+      <div class="edit-task-form-container">
+        ${createEditFormHTML()}
+      </div>
+    </div>
+    <form data-task-form class="task-form">
+      <input data-task-input class="task-input" type="text" placeholder="新增項目" />
+      <button data-submit-task-btn class="submit-task-btn"></button>
+    </form>
+  </div>`
+}

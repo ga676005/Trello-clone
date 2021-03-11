@@ -1,7 +1,16 @@
 import addGlobalEventListener from './utils/addGlobalEventListener.js'
 
 const DEFAULT_SPACING = 15
-const POSITION_ORDER = ['topRight', 'topLeft', 'bottomLeft', 'bottomRight', 'top', 'bottom', 'left', 'right']
+const POSITION_ORDER = [
+  'topRight',
+  'topLeft',
+  'bottomLeft',
+  'bottomRight',
+  'top',
+  'bottom',
+  'left',
+  'right'
+]
 const POSITION_TO_FUNCTION_MAP = {
   bottomLeft: positionTooltipBottomLeft,
   bottomRight: positionTooltipBottomRight,
@@ -12,7 +21,7 @@ const POSITION_TO_FUNCTION_MAP = {
   left: positionTooltipLeft,
   right: positionTooltipRight
 }
-const ARROW_STYLE = '5px solid rebeccapurple'
+const ARROW_STYLE = '4px solid rebeccapurple'
 
 //定位tooltip用的container
 const tooltipContainer = document.createElement('div')
@@ -21,6 +30,8 @@ document.body.append(tooltipContainer)
 
 addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   if (e.target.dataset.tooltip.trim() === '') return
+  tooltipContainer.innerHTML = ''
+
   const tooltip = createTooltipElement(e.target.dataset.tooltip)
   tooltipContainer.append(tooltip)
   //tooltip要先加到頁面上才能定位
@@ -373,8 +384,8 @@ function resetTooltipArrowPosition(tooltip) {
  */
 function setTooltipArrowProperties([pos1, pos2], tooltip, spacing) {
   if (pos2 && pos1) {
-    tooltip.style.setProperty(`--${pos1}`, `-${spacing}px`)
-    tooltip.style.setProperty(`--${pos2}`, `-${spacing}px`)
+    tooltip.style.setProperty(`--${pos1}`, `-${spacing - 5}px`)
+    tooltip.style.setProperty(`--${pos2}`, `-${spacing - 5}px`)
     tooltip.style.setProperty(`--border-${pos1}`, ARROW_STYLE)
     tooltip.style.setProperty(`--border-${pos2}`, ARROW_STYLE)
   } else {
@@ -416,4 +427,3 @@ function setTooltipArrowProperties([pos1, pos2], tooltip, spacing) {
     }
   }
 }
-console.log('hi')
