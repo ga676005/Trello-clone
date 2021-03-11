@@ -1,3 +1,4 @@
+import './tooltip.js'
 import setupDragAndDrop from './dragAndDrop.js'
 import generateUniqueString from './utils/generateUniqueString.js'
 import addGlobalEventListener from './utils/addGlobalEventListener.js'
@@ -35,7 +36,6 @@ const lanesContainer = document.querySelector('[data-lanes-container]')
 
 let lanes = loadLanes()
 renderLanes()
-animateLoading()
 
 setupDragAndDrop(onDragComplete)
 
@@ -112,17 +112,20 @@ function loadLanes() {
 function renderLanes() {
   const lanesHTML = lanes.map(createLaneHTML).join('')
   lanesContainer.innerHTML = lanesHTML
+  if (lanesContainer.children.length > 0) animateLoading()
 }
 
+// Create task HTML
 function createTaskHTML({ id, text } = {}) {
   return `
-  <div class="task" data-draggable data-task-id=${id}>
+  <div class="task" data-draggable data-task-id=${id} data-tooltip="test where is my color" data-spacing="15" data-positions="bottom">
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
   </div>`
 }
 
+// Create lane HTML
 function createLaneHTML({ id, name, color, tasks, style } = {}) {
   return `
   <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ''}">
