@@ -124,7 +124,9 @@ function createTaskHTML({ id, text } = {}) {
 
 function createLaneHTML({ id, name, color, tasks, style } = {}) {
   return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ""}">
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};${
+    style ?? ''
+  }">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
@@ -174,7 +176,7 @@ function handleUpload() {
       if (uploadLane) {
         const { tasks } = uploadLane
 
-        // 用上傳的檔案覆蓋同一個欄位的稱稱 
+        // 用上傳的檔案覆蓋同一個欄位的稱稱
         lane.name = uploadLane.name
 
         // 找出上傳檔案和目前檔案同一個欄位中，不同的tasks
@@ -188,7 +190,6 @@ function handleUpload() {
         // 把不同的tasks加到原本的tasks後面
         lane.tasks = [...lane.tasks, ...distinctTasks]
       }
-
     })
 
     // 上傳檔案跟目前檔案不同的欄位
@@ -233,7 +234,7 @@ function addLane() {
     id: generateUniqueString(5),
     name: '自訂標題',
     color: randomInteger(1, 360),
-    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }],
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
     // style: "transform: scale(0);"
   }
 
@@ -243,96 +244,113 @@ function addLane() {
   const lane = lanesContainer.lastElementChild
   animateAddLane(lane)
 
-
   lanes = [...lanes, DEFAULT_NEW_LANE]
   saveLanes()
 }
 
-
 // delete
-addGlobalEventListener("click", "[data-delete-task]", e => {
+addGlobalEventListener('click', '[data-delete-task]', (e) => {
   const $task = e.target.closest('.task')
   const $lane = e.target.closest('.lane')
 
-  const lane = lanes.find(l => l.id === $lane.dataset.id)
-  lane.tasks = lane.tasks.filter(t => t.id !== $task.id)
+  const lane = lanes.find((l) => l.id === $lane.dataset.id)
+  lane.tasks = lane.tasks.filter((t) => t.id !== $task.id)
   saveLanes()
 
   animateDeleteTask($task)
 
   setTimeout(() => {
     $task.remove()
-  }, 500);
-
+  }, 500)
 })
 
-addGlobalEventListener("click", "[data-delete-lane]", e => {
+addGlobalEventListener('click', '[data-delete-lane]', (e) => {
   const lane = e.target.closest('.lane')
-  lanes = lanes.filter(l => l.id !== lane.dataset.id)
+  lanes = lanes.filter((l) => l.id !== lane.dataset.id)
   saveLanes()
 
   animateDeleteLane(lane)
 
   setTimeout(() => {
     lane.remove()
-  }, 500);
+  }, 500)
 })
 
 // make toolbar labels clickable
-addGlobalEventListener('click', ".toolbar__list-item label", e => {
+addGlobalEventListener('click', '.toolbar__list-item label', (e) => {
   e.target.parentElement.querySelector('button').click()
 })
 
 const deleteBtn = document.querySelector('[data-delete-mode]')
 
-deleteBtn.addEventListener('click', e => {
+deleteBtn.addEventListener('click', (e) => {
   document.body.classList.toggle('delete-mode')
   const isDeleteMode = document.body.classList.contains('delete-mode')
 
-  deleteBtn.nextElementSibling.textContent = isDeleteMode ? "解除刪除模式" : "進入刪除模式"
+  deleteBtn.nextElementSibling.textContent = isDeleteMode
+    ? '解除刪除模式'
+    : '進入刪除模式'
 })
 
 // scroll and add background color to header
-window.addEventListener('scroll', e => {
+window.addEventListener('scroll', (e) => {
   const isScrollDown = window.scrollY > 50
   document.body.classList.toggle('scroll-down', isScrollDown)
 })
 
-
 function animateDeleteLane(lane) {
-  gsap.to(lane, { opacity: 0, duration: .5, ease: Power4.easeOut, })
-  gsap.to(lane, { rotation: 30, duration: .5, ease: Power4.easeOut, })
-  gsap.to(lane, { x: 150, y: 300, duration: 2, ease: Power4.easeOut, })
+  gsap.to(lane, { opacity: 0, duration: 0.5, ease: Power4.easeOut })
+  gsap.to(lane, { rotation: 30, duration: 0.5, ease: Power4.easeOut })
+  gsap.to(lane, { x: 150, y: 300, duration: 2, ease: Power4.easeOut })
 }
 
 function animateDeleteTask($task) {
-  gsap.to($task, { x: 500, duration: .4, ease: "elastic.in(1.5, 0.75)" })
-  gsap.to($task, { y: "random(20,-20)", duration: .2, ease: "elastic.in(1.5, 0.75)" })
-  gsap.to($task, { y: "random(20,-20)", duration: .2, ease: "elastic.in(1.5, 0.75)" })
+  gsap.to($task, { x: 500, duration: 0.4, ease: 'elastic.in(1.5, 0.75)' })
+  gsap.to($task, {
+    y: 'random(20,-20)',
+    duration: 0.2,
+    ease: 'elastic.in(1.5, 0.75)'
+  })
+  gsap.to($task, {
+    y: 'random(20,-20)',
+    duration: 0.2,
+    ease: 'elastic.in(1.5, 0.75)'
+  })
 }
 
 function animateAddLane(lane) {
-  gsap.set('.toolbar', { pointerEvents: " none " })
+  gsap.set('.toolbar', { pointerEvents: ' none ' })
   gsap.set(lane, { scale: 0.5 })
   gsap.to(lane, {
-    scale: 1, duration: 0.3, y: 0, opacity: 1, ease: "back.out(2)", onComplete: function () {
-      document.querySelector('.toolbar').style.pointerEvents = "unset"
+    scale: 1,
+    duration: 0.3,
+    y: 0,
+    opacity: 1,
+    ease: 'back.out(2)',
+    onComplete: function () {
+      document.querySelector('.toolbar').style.pointerEvents = 'unset'
     }
   })
 }
 
 function animateLoading() {
   gsap.set('.lane', { y: '-500' })
-  gsap.set('.toolbar', { pointerEvents: " none " })
+  gsap.set('.toolbar', { pointerEvents: ' none ' })
   gsap.to('.lane', {
-    duration: .4, ease: "elastic.out(1, 0.3)", opacity: 1, y: 0, stagger: .35, delay: .5, onComplete: function () {
-      document.querySelector('.toolbar').style.pointerEvents = "unset"
+    duration: 0.4,
+    ease: 'elastic.out(1, 0.3)',
+    opacity: 1,
+    y: 0,
+    stagger: 0.35,
+    delay: 0.5,
+    onComplete: function () {
+      document.querySelector('.toolbar').style.pointerEvents = 'unset'
     }
   })
 }
 
 // show change title input
-document.addEventListener('dblclick', e => {
+document.addEventListener('dblclick', (e) => {
   const header = e.target.closest('.lane__header')
   if (!header) return
   header.classList.add('show-input')
@@ -340,13 +358,15 @@ document.addEventListener('dblclick', e => {
   const title = header.querySelector('.lane__title')
 
   input.value = title.textContent.trim()
+
+  setupHideInputEvents(header)
 })
 
 // change lane title
-addGlobalEventListener('submit', '.lane__header__form', e => {
+addGlobalEventListener('submit', '.lane__header__form', (e) => {
   e.preventDefault()
   const text = e.target.querySelector('[data-change-title-input]').value
-  if (text === "") return
+  if (text === '') return
 
   const header = e.target.closest('.lane__header')
   const title = header.querySelector('.lane__title')
@@ -360,10 +380,17 @@ addGlobalEventListener('submit', '.lane__header__form', e => {
 
   lane.dataset.laneId = text
 
-  lanes.find(l => l.name === originalName).name = text
+  lanes.find((l) => l.name === originalName).name = text
   saveLanes()
 })
 
+// Hide change title input
+function setupHideInputEvents(header) {
+  const hideFunction = (e) => {
+    if (e.target.closest('.lane__header') === header) return
+    header.classList.remove('show-input')
+    document.removeEventListener('click', hideFunction)
+  }
 
-
-
+  document.addEventListener('click', hideFunction)
+}
