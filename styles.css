@@ -1,8 +1,11 @@
 :root {
+  --clr-neutral-0: rgb(255, 255, 255);
   --clr-neutral-100: hsla(0, 0%, 90%, 0.8);
+  --clr-neutral-200: hsla(0, 0%, 100%, 0.9);
   --clr-neutral-400: hsl(0, 0%, 50%);
   --clr-neutral-500: hsl(0, 0%, 40%);
   --clr-neutral-600: hsl(0, 0%, 30%);
+  --clr-neutral-800: hsl(0, 0%, 10%, 0.9);
   --clr-neutral-900: hsl(0, 0%, 10%);
 
   --box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.005),
@@ -28,6 +31,7 @@ body {
   background-blend-mode: multiply;
   background-attachment: fixed;
   font-size: 2rem;
+  overflow-x: hidden;
 }
 
 /* reset */
@@ -41,11 +45,13 @@ li {
   font-weight: 400;
 }
 input,
-button {
+button,
+textarea {
   font: inherit;
   border: none;
   background: none;
   outline: none;
+  resize: none;
 }
 
 button {
@@ -147,12 +153,14 @@ button {
   flex-grow: 1;
   overflow-y: auto;
   overflow: hidden;
+  /* position: relative; */
 }
 
 .task {
   padding: 0.25rem;
   border-radius: 0.25rem;
-  background-color: white;
+  background-color: var(--clr-neutral-200);
+  color: var(--clr-neutral-800);
   cursor: var(--grab, grab);
   margin: 0.25rem 0;
   word-wrap: break-word;
@@ -160,6 +168,113 @@ button {
   font-size: 1.5rem;
 }
 
+.task.is-selected {
+  position: absolute;
+  padding: 1em;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  background-color: var(--clr-neutral-900);
+  color: var(--clr-neutral-200);
+  pointer-events: none;
+}
+.edit-task {
+  position: absolute;
+  height: 100%;
+  padding-left: 5px;
+  right: 0;
+  top: 0;
+  font-size: 2rem;
+  color: hsl(var(--clr-primary));
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.2s ease;
+  cursor: pointer;
+}
+.task:hover .edit-task {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* .edit-task:active,
+.edit-task:focus {
+} */
+
+/* #region edit task */
+.show-edit-form .task-edit-form {
+  z-index: 1;
+  transform: scaleY(1);
+  opacity: 1;
+  transform-origin: top;
+  transition: transform 0.3s, z-index 0s ease, opacity 0.5s;
+}
+
+.task-edit-form {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 0.3s, z-index 0s 0.3s, opacity 0.5s;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--clr-neutral-0);
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 100%;
+  grid-template-rows: min-content 1fr min-content;
+  font-size: 1.5rem;
+}
+
+.edit-task-input,
+.edit-task-notes {
+  color: var(--clr-neutral-800);
+  background-color: hsl(var(--clr-secondary));
+
+  margin: 1rem;
+  box-shadow: 0px 2px 5px hsla(var(--clr-primary), 0.5),
+    0px 10px 10px hsl(var(--clr-secondary), 0.3);
+}
+
+.edit-task-input {
+  margin-bottom: 0;
+  padding-left: 0.5rem;
+}
+
+.edit-task-notes {
+  font-size: 1rem;
+  padding: 0.7rem;
+}
+
+.edit-task-submit-btn {
+  padding: 0.5rem;
+  color: hsl(var(--clr-primary));
+  background-image: linear-gradient(
+    45deg,
+    hsl(var(--clr-primary)) 50%,
+    hsl(var(--clr-secondary)) 50%
+  );
+  background-size: 250%;
+  background-repeat: no-repeat;
+  background-position: 100% 0%;
+  transition: background-position 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19),
+    color 0.3s ease;
+}
+
+.edit-task-submit-btn:hover {
+  background-position: 0%;
+  color: hsl(var(--clr-secondary));
+}
+
+/* 擋到原本的draggable */
+.task-title {
+  pointer-events: none;
+}
+/* #endregion edit task */
+
+/* #region  add task */
 .task-input {
   padding: 0.5rem 1rem;
   border: none;
@@ -179,6 +294,8 @@ button {
 .lane:hover .task-input::placeholder {
   opacity: 1;
 }
+
+/* #endregion  add task */
 
 [data-draggable] {
   user-select: none;

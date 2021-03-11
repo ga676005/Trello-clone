@@ -53,7 +53,7 @@ function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
   const endLaneTasks = lanes.find((l) => l.id === endLaneId).tasks
   //找出被拖曳的task
 
-  const task = startLaneTasks.find((t) => t.id === dragElement.id)
+  const task = startLaneTasks.find((t) => t.id === dragElement.dataset.taskId)
 
   //把它從原本的陣列移除，用回傳的index插入到目標陣列中
   startLaneTasks.splice(startLaneTasks.indexOf(task), 1)
@@ -116,10 +116,12 @@ function renderLanes() {
 
 function createTaskHTML({ id, text } = {}) {
   return `
-  <div class="task" data-draggable id=${id}>
+  <div class="task" data-draggable data-task-id=${id}>
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
-    ${text}
+    <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
+    <p class="task-title">${text}</p>
   </div>`
+  // <p class="task-title">${text}</p>
 }
 
 function createLaneHTML({ id, name, color, tasks, style } = {}) {
@@ -143,8 +145,15 @@ function createLaneHTML({ id, name, color, tasks, style } = {}) {
         </div>
       </form>
     </div>
-    <div class="tasks" data-drop-zone data-lane-id="${name}">
+    <div class="tasks " data-drop-zone data-lane-id="${name}">
       ${tasks.map(createTaskHTML).join('')}
+      <div class="edit-task-form-container">
+        <form data-edit-task-form class="task-edit-form">
+          <input type="text" name="task-title" class="edit-task-input"  placeholder="修改標題">
+          <textarea name="task-notes" class="edit-task-notes" placeholder="新增備註..."></textarea>
+          <button class="edit-task-submit-btn" type="submit">OK!</button>
+        </form>
+      </div>
     </div>
     <form data-task-form class="task-form">
       <input data-task-input class="task-input" type="text" placeholder="新增項目" />
@@ -359,7 +368,7 @@ document.addEventListener('dblclick', (e) => {
 
   input.value = title.textContent.trim()
 
-  setupHideInputEvents(header)
+  setupHideElementEvents(header, '.lane__header', 'show-input')
 })
 
 // change lane title
@@ -384,13 +393,58 @@ addGlobalEventListener('submit', '.lane__header__form', (e) => {
   saveLanes()
 })
 
-// Hide change title input
-function setupHideInputEvents(header) {
+// Hide element
+function setupHideElementEvents(element, selector, className, targetElements) {
   const hideFunction = (e) => {
-    if (e.target.closest('.lane__header') === header) return
-    header.classList.remove('show-input')
+    if (e.target.closest(selector) === element) return
+    element.classList.remove(className)
     document.removeEventListener('click', hideFunction)
   }
 
   document.addEventListener('click', hideFunction)
 }
+
+// Edit task
+addGlobalEventListener('click', '[data-edit-task]', (e) => {
+  const task = e.target.closest('.task')
+  const tasksContainer = e.target.closest('.tasks')
+  const input = tasksContainer.querySelector('.edit-task-input')
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+  const taskTitle = task.querySelector('.task-title').textContent.trim()
+  input.value = taskTitle
+
+  tasksContainer.classList.add('show-edit-form')
+  tasksContainer.dataset.taskId = task.dataset.taskId
+  tasksContainer.dataset.taskTitle = taskTitle
+
+  console.log(input, textarea)
+})
+
+addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
+  e.preventDefault()
+  const input = e.target.elements['task-title']
+  const textarea = e.target.elements['task-notes']
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const $lane = tasksContainer.closest('.lane')
+  const $task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+
+  const newTitle = input.value
+  if (newTitle === '') return
+
+  $task.querySelector('.task-title').textContent = newTitle
+  let tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
+  const task = tasks.find((t) => t.id === taskId)
+  task.text = newTitle
+  saveLanes()
+
+  tasksContainer.classList.remove('show-edit-form')
+})
+
+/**
+ * <form data-edit-task-form class="task-edit-form">
+      <input type="text" class="edit-task-input"  placeholder="修改標題">
+      <textarea class="edit-task-notes" placeholder="新增備註..."></textarea>
+      <button class="edit-task-submit-btn" type="submit">OK!</button>
+   </form>
+ */
