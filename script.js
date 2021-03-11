@@ -121,14 +121,11 @@ function createTaskHTML({ id, text } = {}) {
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
   </div>`
-  // <p class="task-title">${text}</p>
 }
 
 function createLaneHTML({ id, name, color, tasks, style } = {}) {
   return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};${
-    style ?? ''
-  }">
+  <div data-id=${id} class="lane" style="--clr-modifier:${color};${style ?? ''}">
     <div class="lane__header">
       <h2 class="lane__title">
          ${name}
@@ -162,13 +159,33 @@ function createLaneHTML({ id, name, color, tasks, style } = {}) {
   </div>`
 }
 
+// add lane
+const addLaneBtn = document.querySelector('[data-add-lane]')
+
+addLaneBtn.addEventListener('click', addLane)
+
+function addLane() {
+  const DEFAULT_NEW_LANE = {
+    id: generateUniqueString(5),
+    name: '自訂標題',
+    color: randomInteger(1, 360),
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
+    // style: "transform: scale(0);"
+  }
+
+  const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
+  lanesContainer.innerHTML += laneHTML
+
+  const lane = lanesContainer.lastElementChild
+  animateAddLane(lane)
+
+  lanes = [...lanes, DEFAULT_NEW_LANE]
+  saveLanes()
+}
+
 const fileInput = document.querySelector('#uploadJson')
 const downloadBtn = document.querySelector('#downloadJson')
-
-//上傳
 fileInput.addEventListener('change', handleUpload)
-
-//下載
 downloadBtn.addEventListener('click', handleDownload)
 
 function handleUpload() {
@@ -185,14 +202,20 @@ function handleUpload() {
       if (uploadLane) {
         const { tasks } = uploadLane
 
-        // 用上傳的檔案覆蓋同一個欄位的稱稱
+        // 用上傳的檔案覆蓋同一個欄位的名稱
         lane.name = uploadLane.name
+
+        // 用上傳的內容覆蓋相同id的task
+        lane.tasks.forEach((localTask) => {
+          const uploadTask = tasks.find((uploadTask) => uploadTask.id === localTask.id)
+          if (uploadTask) {
+            localTask.text = uploadTask.text
+          }
+        })
 
         // 找出上傳檔案和目前檔案同一個欄位中，不同的tasks
         const distinctTasks = tasks.filter((uploadTask) => {
-          const sameTask = lane.tasks.some(
-            (laneTask) => laneTask.id === uploadTask.id
-          )
+          const sameTask = lane.tasks.some((laneTask) => laneTask.id === uploadTask.id)
           return sameTask ? false : true
         })
 
@@ -222,9 +245,7 @@ function handleDownload() {
   const filename = 'trello_clone.json'
   const element = document.createElement('a')
 
-  element.href = `data:application/json;charset=utf-8, ${encodeURIComponent(
-    JSON.stringify(lanes)
-  )}`
+  element.href = `data:application/json;charset=utf-8, ${encodeURIComponent(JSON.stringify(lanes))}`
   element.download = filename
   document.body.appendChild(element)
 
@@ -233,72 +254,40 @@ function handleDownload() {
   element.remove()
 }
 
-// add lane
-const addLaneBtn = document.querySelector('[data-add-lane]')
-
-addLaneBtn.addEventListener('click', addLane)
-
-function addLane() {
-  const DEFAULT_NEW_LANE = {
-    id: generateUniqueString(5),
-    name: '自訂標題',
-    color: randomInteger(1, 360),
-    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
-    // style: "transform: scale(0);"
-  }
-
-  const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
-  lanesContainer.innerHTML += laneHTML
-
-  const lane = lanesContainer.lastElementChild
-  animateAddLane(lane)
-
-  lanes = [...lanes, DEFAULT_NEW_LANE]
-  saveLanes()
-}
-
-// delete
+// delete task
 addGlobalEventListener('click', '[data-delete-task]', (e) => {
   const $task = e.target.closest('.task')
   const $lane = e.target.closest('.lane')
 
   const lane = lanes.find((l) => l.id === $lane.dataset.id)
-  lane.tasks = lane.tasks.filter((t) => t.id !== $task.id)
+  lane.tasks = lane.tasks.filter((t) => t.id !== $task.dataset.taskId)
   saveLanes()
 
   animateDeleteTask($task)
-
-  setTimeout(() => {
-    $task.remove()
-  }, 500)
 })
 
+// delete lane
 addGlobalEventListener('click', '[data-delete-lane]', (e) => {
   const lane = e.target.closest('.lane')
   lanes = lanes.filter((l) => l.id !== lane.dataset.id)
   saveLanes()
 
   animateDeleteLane(lane)
-
-  setTimeout(() => {
-    lane.remove()
-  }, 500)
 })
 
-// make toolbar labels clickable
-addGlobalEventListener('click', '.toolbar__list-item label', (e) => {
-  e.target.parentElement.querySelector('button').click()
-})
-
+// delete mode button
 const deleteBtn = document.querySelector('[data-delete-mode]')
 
 deleteBtn.addEventListener('click', (e) => {
   document.body.classList.toggle('delete-mode')
   const isDeleteMode = document.body.classList.contains('delete-mode')
 
-  deleteBtn.nextElementSibling.textContent = isDeleteMode
-    ? '解除刪除模式'
-    : '進入刪除模式'
+  deleteBtn.nextElementSibling.textContent = isDeleteMode ? '解除刪除模式' : '進入刪除模式'
+})
+
+// make toolbar labels clickable
+addGlobalEventListener('click', '.toolbar__list-item label', (e) => {
+  e.target.parentElement.querySelector('button').click()
 })
 
 // scroll and add background color to header
@@ -309,12 +298,26 @@ window.addEventListener('scroll', (e) => {
 
 function animateDeleteLane(lane) {
   gsap.to(lane, { opacity: 0, duration: 0.5, ease: Power4.easeOut })
-  gsap.to(lane, { rotation: 30, duration: 0.5, ease: Power4.easeOut })
+  gsap.to(lane, {
+    rotation: 30,
+    duration: 0.5,
+    ease: Power4.easeOut,
+    onComplete: function () {
+      lane.remove()
+    }
+  })
   gsap.to(lane, { x: 150, y: 300, duration: 2, ease: Power4.easeOut })
 }
 
 function animateDeleteTask($task) {
-  gsap.to($task, { x: 500, duration: 0.4, ease: 'elastic.in(1.5, 0.75)' })
+  gsap.to($task, {
+    x: 500,
+    duration: 0.4,
+    ease: 'elastic.in(1.5, 0.75)',
+    onComplete: function () {
+      $task.remove()
+    }
+  })
   gsap.to($task, {
     y: 'random(20,-20)',
     duration: 0.2,
@@ -358,7 +361,7 @@ function animateLoading() {
   })
 }
 
-// show change title input
+// show edit title input
 document.addEventListener('dblclick', (e) => {
   const header = e.target.closest('.lane__header')
   if (!header) return
@@ -371,11 +374,11 @@ document.addEventListener('dblclick', (e) => {
   setupHideElementEvents(header, '.lane__header', 'show-input')
 })
 
-// change lane title
+// edit lane title
 addGlobalEventListener('submit', '.lane__header__form', (e) => {
   e.preventDefault()
   const text = e.target.querySelector('[data-change-title-input]').value
-  if (text === '') return
+  if (text.trim() === '') return
 
   const header = e.target.closest('.lane__header')
   const title = header.querySelector('.lane__title')
@@ -416,8 +419,6 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
-
-  console.log(input, textarea)
 })
 
 addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
@@ -430,7 +431,7 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   const $task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
 
   const newTitle = input.value
-  if (newTitle === '') return
+  if (newTitle.trim() === '') return
 
   $task.querySelector('.task-title').textContent = newTitle
   let tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
