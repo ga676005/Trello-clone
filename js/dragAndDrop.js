@@ -1,4 +1,4 @@
-import addGlobalEventListener from './utils/addGlobalEventListener.js'
+import addGlobalEventListener from '../utils/addGlobalEventListener.js'
 
 export default function setup(onDragComplete) {
   addGlobalEventListener('mousedown', '[data-draggable]', (e) => {

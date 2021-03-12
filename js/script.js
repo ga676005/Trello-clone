@@ -1,8 +1,8 @@
 import './tooltip.js'
 import setupDragAndDrop from './dragAndDrop.js'
-import generateUniqueString from './utils/generateUniqueString.js'
-import addGlobalEventListener from './utils/addGlobalEventListener.js'
-import randomInteger from './utils/randomInteger.js'
+import generateUniqueString from '../utils/generateUniqueString.js'
+import addGlobalEventListener from '../utils/addGlobalEventListener.js'
+import randomInteger from '../utils/randomInteger.js'
 
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
@@ -26,7 +26,6 @@ const DEFAULT_LANES = [
     tasks: [{ id: '3', text: '點右上角的圖標變換顏色', notes: null }]
   }
 ]
-
 const lanesContainer = document.querySelector('[data-lanes-container]')
 
 setupDragAndDrop(onDragComplete)
@@ -364,12 +363,19 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const taskTitle = task.querySelector('.task-title').textContent.trim()
   const taskNotes = task.dataset.tooltip
   const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
+  const fontSize = parseFloat(task.dataset.fontSize)
+  const radioButton = tasksContainer.querySelector(`.tooltip-font-size-input[value='${fontSize}']`)
 
   input.value = taskTitle
   textarea.value = taskNotes
+  textarea.style.fontSize = `${fontSize}rem`
+  // radioButton.checked = true
+
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
+
+
 
   const buttons = [...tasksContainer.querySelectorAll('.arrow')]
   buttons.forEach((btn) => {
@@ -435,6 +441,12 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   task.text = newTitle
   task.notes = newNotes
   task.tooltipPosition = $task.dataset.positions
+  task.fontSize = $task.dataset.fontSize
+  task.arrowSize = $task.dataset.arrowSize
+
+  console.log(task)
+
+
 
   saveLanes()
 
@@ -442,15 +454,30 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 })
 
 // Create task HTML
-function createTaskHTML({ id, text, notes = null, tooltipPosition = '' } = {}) {
+function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem" } = {}) {
   return `
   <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
-    }" data-spacing="15" data-positions=${tooltipPosition}>
+    }" data-spacing="0" data-positions=${tooltipPosition} data-font-size=${fontSize} data-arrow-size=${arrowSize}>
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
   </div>`
 }
+
+addGlobalEventListener('change', '.tooltip-font-size-input', e => {
+  console.log(typeof (e.target.value))
+  const input = e.target
+  const fontSize = Number(e.target.value)
+  const tasksContainer = e.target.closest('.tasks')
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  task.dataset.fontSize = `${fontSize}rem`
+  task.dataset.arrowSize = `${fontSize + 0.5}rem`
+  console.log(task)
+
+  textarea.style.fontSize = `${fontSize}rem`
+})
 
 function createEditFormHTML() {
   return `
@@ -466,6 +493,20 @@ function createEditFormHTML() {
       <button type="button" data-position="topRight" class="arrow arrow-ne">&nearr;</button>
       <button type="button" data-position="bottomLeft" class="arrow arrow-sw">&swarr;</button>
       <button type="button" data-position="bottomRight" class="arrow arrow-se">&searr;</button>
+    </div>
+    <div class="task-edit-form__tooltip-styles" >
+      <div>字體
+        <input type="radio" value=2 id="big" name="size" class="tooltip-font-size-input">
+        <label for="big">大</label>
+        <input type="radio" value=1.5 id="medium" name="size" class="tooltip-font-size-input">
+        <label for="medium">中</label>  
+        <input type="radio" value=1 id="small" name="size" class="tooltip-font-size-input">
+        <label for="small">小</label>
+      </div>
+      <input type="checkbox" id="arrow-toggler" class="">
+      <label for="arrow-toggler">顯示箭頭</label>
+
+      <input type="color" id="" >
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
   </form>`

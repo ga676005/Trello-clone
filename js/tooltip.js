@@ -1,16 +1,7 @@
-import addGlobalEventListener from './utils/addGlobalEventListener.js'
+import addGlobalEventListener from '../utils/addGlobalEventListener.js'
 
 const DEFAULT_SPACING = 15
-const POSITION_ORDER = [
-  'topRight',
-  'topLeft',
-  'bottomLeft',
-  'bottomRight',
-  'top',
-  'bottom',
-  'left',
-  'right'
-]
+const POSITION_ORDER = ['topRight', 'topLeft', 'bottomLeft', 'bottomRight', 'top', 'bottom', 'left', 'right']
 const POSITION_TO_FUNCTION_MAP = {
   bottomLeft: positionTooltipBottomLeft,
   bottomRight: positionTooltipBottomRight,
@@ -21,7 +12,11 @@ const POSITION_TO_FUNCTION_MAP = {
   left: positionTooltipLeft,
   right: positionTooltipRight
 }
-const ARROW_STYLE = '4px solid rebeccapurple'
+const defaultBgColor = "rgb(255, 255, 255)"
+const defaultColor = "rgba(17, 17, 17, 0.87)"
+const defaultFontSize = "1rem"
+const defaultArrowFontSize = "1.5rem"
+const defaultSpacing = 1
 
 //定位tooltip用的container
 const tooltipContainer = document.createElement('div')
@@ -30,11 +25,19 @@ document.body.append(tooltipContainer)
 
 addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   if (e.target.dataset.tooltip.trim() === '') return
-  tooltipContainer.innerHTML = ''
+  tooltipContainer.innerHTML = creatTooltipHTML(e.target.dataset.tooltip)
 
-  const tooltip = createTooltipElement(e.target.dataset.tooltip)
-  tooltipContainer.append(tooltip)
-  //tooltip要先加到頁面上才能定位
+
+  const tooltip = tooltipContainer.children[0]
+  const { bgColor, fgColor, fontSize, arrowSize, spacing } = e.target.dataset
+
+  //tooltip style
+  tooltipContainer.style.setProperty('--tooltip-bg-clr', bgColor ?? defaultBgColor)
+  tooltipContainer.style.setProperty('--tooltip-fg-clr', fgColor ?? defaultColor)
+  tooltipContainer.style.setProperty('--tooltip-fs', fontSize ?? defaultFontSize)
+  tooltipContainer.style.setProperty('--tooltip-arrow-fs', arrowSize ?? defaultArrowFontSize)
+  tooltipContainer.style.setProperty('--tooltip-spacing', `${spacing / 50 ?? defaultSpacing}rem`)
+
   positionTooltip(tooltip, e.target)
 
   e.target.addEventListener(
@@ -46,16 +49,19 @@ addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   )
 })
 
-/**
- * 建立tooltip element
- * @param {String} text tooltip的內容
- * @returns {Element} 回傳新建立的tooltip
- */
-function createTooltipElement(text) {
-  const tooltip = document.createElement('div')
-  tooltip.classList.add('tooltip')
-  tooltip.innerText = text
-  return tooltip
+function creatTooltipHTML(text) {
+  return `
+  <div class="tooltip-outer">
+    <div class="tooltip">${text}</div>
+    <div class="tooltip-arrow tooltip-arrow-top ">&uharr;</div>
+    <div class="tooltip-arrow tooltip-arrow-right">&rhard;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom">&dharl;</div>
+    <div class="tooltip-arrow tooltip-arrow-left">&lharu;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-left">&swarr;</div>
+    <div class="tooltip-arrow tooltip-arrow-top-right">&nearr;</div>
+    <div class="tooltip-arrow tooltip-arrow-top-left">&nwarr;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-right">&searr;</div>
+  </div>`
 }
 
 /**
@@ -110,7 +116,7 @@ function positionTooltipTop(tooltip, elementRect, spacing) {
     return false
   }
 
-  positionTooltipArrow('bottom', tooltip, spacing)
+  positionTooltipArrow('bottom')
 
   if (bounds.right) {
     //tooltip右邊超出範圍，把右邊位置拉進範圍
@@ -161,7 +167,8 @@ function positionTooltipBottom(tooltip, elementRect, spacing) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('top', tooltip, spacing)
+
+  positionTooltipArrow('top')
 
   if (bounds.right) {
     tooltip.style.right = `${spacing}px`
@@ -200,7 +207,9 @@ function positionTooltipLeft(tooltip, elementRect, spacing) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('right', tooltip, spacing)
+
+  positionTooltipArrow('right')
+
   if (bounds.bottom) {
     tooltip.style.bottom = `${spacing}px`
     tooltip.style.top = 'initial'
@@ -234,7 +243,9 @@ function positionTooltipRight(tooltip, elementRect, spacing) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('left', tooltip, spacing)
+
+  positionTooltipArrow('left')
+
   if (bounds.bottom) {
     tooltip.style.bottom = `${spacing}px`
     tooltip.style.top = 'initial'
@@ -284,14 +295,14 @@ function positionTooltipTopLeft(tooltip, elementRect, spacing) {
   const tooltipRect = tooltip.getBoundingClientRect()
 
   tooltip.style.top = `${elementRect.top - tooltipRect.height - spacing}px`
-  tooltip.style.left = `${elementRect.left - tooltipRect.width - spacing}px`
+  tooltip.style.left = `${elementRect.left - tooltipRect.width}px`
 
   const bounds = isOutOfBound(tooltip, spacing)
   if (bounds.top || bounds.left) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('bottom-right', tooltip, spacing)
+  positionTooltipArrow('bottom-right')
 
   return true
 }
@@ -300,14 +311,14 @@ function positionTooltipTopRight(tooltip, elementRect, spacing) {
   const tooltipRect = tooltip.getBoundingClientRect()
 
   tooltip.style.top = `${elementRect.top - tooltipRect.height - spacing}px`
-  tooltip.style.left = `${elementRect.right + spacing}px`
+  tooltip.style.left = `${elementRect.right}px`
 
   const bounds = isOutOfBound(tooltip, spacing)
   if (bounds.top || bounds.right) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('bottom-left', tooltip, spacing)
+  positionTooltipArrow('bottom-left')
 
   return true
 }
@@ -324,7 +335,7 @@ function positionTooltipBottomRight(tooltip, elementRect, spacing) {
 
     return false
   }
-  positionTooltipArrow('top-left', tooltip, spacing)
+  positionTooltipArrow('top-left')
 
   return true
 }
@@ -340,90 +351,14 @@ function positionTooltipBottomLeft(tooltip, elementRect, spacing) {
     resetTooltipPosition(tooltip)
     return false
   }
-  positionTooltipArrow('top-right', tooltip, spacing)
+  positionTooltipArrow('top-right')
 
   return true
 }
 
-/**
- * 定位tooltip的箭頭位置
- * @param {String} direction 箭頭要出現在tooltip的位置，上下左右 "top"，斜角 "top-left"
- * @param {Element} tooltip
- * @param {Number} spacing
- */
-function positionTooltipArrow(direction, tooltip, spacing) {
-  resetTooltipArrowPosition(tooltip)
-  const arrowPosition = direction.split('-')
-  if (arrowPosition.length === 1 && spacing < DEFAULT_SPACING) return
-  //tooltip出現在上下左右時spacing小於預設的15會看起來不和諧所以不顯示
 
-  setTooltipArrowProperties(arrowPosition, tooltip, spacing)
+function positionTooltipArrow(direction) {
+  const arrow = tooltipContainer.querySelector(`.tooltip-arrow-${direction}`)
+  arrow.classList.add('show')
 }
 
-/**
- * 重置tooltip定位箭頭用的custom properties
- * @param {Element} tooltip
- */
-function resetTooltipArrowPosition(tooltip) {
-  tooltip.style.setProperty('--transform', 'unset')
-  tooltip.style.setProperty('--top', 'unset')
-  tooltip.style.setProperty('--right', 'unset')
-  tooltip.style.setProperty('--bottom', 'unset')
-  tooltip.style.setProperty('--left', 'unset')
-  tooltip.style.setProperty('--border-top', 'none')
-  tooltip.style.setProperty('--border-right', 'none')
-  tooltip.style.setProperty('--border-bottom', 'none')
-  tooltip.style.setProperty('--border-left', 'none')
-}
-
-/**
- * 定位tooltip箭頭的位置和設定樣式
- * @param {Array} position 從positionTooltipArrow傳下來的position array
- * @param {Element} tooltip
- * @param {Number} spacing
- */
-function setTooltipArrowProperties([pos1, pos2], tooltip, spacing) {
-  if (pos2 && pos1) {
-    tooltip.style.setProperty(`--${pos1}`, `-${spacing - 5}px`)
-    tooltip.style.setProperty(`--${pos2}`, `-${spacing - 5}px`)
-    tooltip.style.setProperty(`--border-${pos1}`, ARROW_STYLE)
-    tooltip.style.setProperty(`--border-${pos2}`, ARROW_STYLE)
-  } else {
-    const tooltipRect = tooltip.getBoundingClientRect()
-    const ARROW_DISTANCE_FROM_ELEMENT = spacing - 5
-    switch (pos1) {
-      case 'bottom':
-        tooltip.style.setProperty('--bottom', `-${ARROW_DISTANCE_FROM_ELEMENT}px`)
-        tooltip.style.setProperty('--left', `${tooltipRect.width / 2}px`)
-        tooltip.style.setProperty('--border-bottom', ARROW_STYLE)
-        tooltip.style.setProperty('--border-right', ARROW_STYLE)
-        tooltip.style.setProperty('--transform', 'translateX(-50%) rotate(45deg)')
-        break
-      case 'top':
-        tooltip.style.setProperty('--top', `-${ARROW_DISTANCE_FROM_ELEMENT}px`)
-        tooltip.style.setProperty('--left', `${tooltipRect.width / 2}px`)
-        tooltip.style.setProperty('--border-top', ARROW_STYLE)
-        tooltip.style.setProperty('--border-left', ARROW_STYLE)
-        tooltip.style.setProperty('--transform', 'translateX(-50%) rotate(45deg)')
-        break
-      case 'right':
-        tooltip.style.setProperty('--top', `${tooltipRect.height / 2}px`)
-        tooltip.style.setProperty('--right', `-${ARROW_DISTANCE_FROM_ELEMENT}px`)
-        tooltip.style.setProperty('--border-top', ARROW_STYLE)
-        tooltip.style.setProperty('--border-right', ARROW_STYLE)
-        tooltip.style.setProperty('--transform', 'translateY(-50%) rotate(45deg)')
-        break
-      case 'left':
-        tooltip.style.setProperty('--top', `${tooltipRect.height / 2}px`)
-        tooltip.style.setProperty('--left', `-${ARROW_DISTANCE_FROM_ELEMENT}px`)
-        tooltip.style.setProperty('--border-bottom', ARROW_STYLE)
-        tooltip.style.setProperty('--border-left', ARROW_STYLE)
-        tooltip.style.setProperty('--transform', 'translateY(-50%) rotate(45deg)')
-        break
-
-      default:
-        resetTooltipArrowPosition(tooltip)
-        break
-    }
-  }
-}
