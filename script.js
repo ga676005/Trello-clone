@@ -119,7 +119,6 @@ function addLane() {
     name: '自訂標題',
     color: randomInteger(1, 360),
     tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
-    // style: "transform: scale(0);"
   }
 
   const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
@@ -144,47 +143,43 @@ function handleUpload() {
   reader.addEventListener('load', (e) => {
     const uploadData = JSON.parse(reader.result)
 
-    lanes.forEach((lane) => {
-      // 找出同一個欄位
-      const uploadLane = uploadData.find((entry) => entry.id === lane.id)
+    const updatedLocalLanes = lanes.map(localLane => {
+      const uploadLane = uploadData.find(entry => entry.id === localLane.id)
+      if (uploadLane == undefined) return localLane
 
-      if (uploadLane) {
-        const { tasks } = uploadLane
+      const { tasks: uploadTasks } = uploadLane
+      const { tasks: localTasks } = localLane
 
-        // 用上傳的檔案覆蓋同一個欄位的名稱
-        lane.name = uploadLane.name
+      const tasks = [...localTasks, ...uploadTasks]
 
-        // 用上傳的內容覆蓋相同id的task
-        lane.tasks.forEach((localTask) => {
-          const uploadTask = tasks.find((uploadTask) => uploadTask.id === localTask.id)
-          if (uploadTask) {
-            localTask.text = uploadTask.text
-            localTask.notes = uploadTask.notes
-          }
-        })
+      const updatedTasks = tasks.reduce((updatedTasks, task) => {
+        const sameIdTask = updatedTasks.find(t => t.id === task.id)
 
-        // 找出上傳檔案和目前檔案同一個欄位中，不同的tasks
-        const distinctTasks = tasks.filter((uploadTask) => {
-          const sameTask = lane.tasks.some((laneTask) => laneTask.id === uploadTask.id)
-          return sameTask ? false : true
-        })
+        if (sameIdTask) {
+          const taskId = sameIdTask.id
+          const taskIndex = updatedTasks.findIndex(t => t.id === taskId)
+          updatedTasks[taskIndex] = task
+        } else {
+          updatedTasks.push(task)
+        }
+        return updatedTasks
+      }, [])
 
-        // 把不同的tasks加到原本的tasks後面
-        lane.tasks = [...lane.tasks, ...distinctTasks]
-      }
+      return { ...localLane, name: uploadLane.name, tasks: updatedTasks }
     })
 
-    // 上傳檔案跟目前檔案不同的欄位
-    const distinctLanes = uploadData.filter((entry) => {
-      const sameLane = lanes.some((lane) => lane.id === entry.id)
-      return sameLane ? false : true
+    const distinctLanes = uploadData.filter(uploadLane => {
+      const hasSameLane = lanes.some(localLane => localLane.id === uploadLane.id)
+      return !hasSameLane
     })
 
-    lanes = [...lanes, ...distinctLanes]
+    lanes = [...updatedLocalLanes, ...distinctLanes]
 
+    // DOM
     renderLanes()
     animateLoading()
 
+    // data
     saveLanes()
   })
 
@@ -232,7 +227,10 @@ deleteBtn.addEventListener('click', (e) => {
   document.body.classList.toggle('delete-mode')
   const isDeleteMode = document.body.classList.contains('delete-mode')
 
-  deleteBtn.nextElementSibling.textContent = isDeleteMode ? '解除刪除模式' : '進入刪除模式'
+  deleteBtn.nextElementSibling.textContent =
+    isDeleteMode
+      ? '解除刪除模式'
+      : '進入刪除模式'
 })
 
 // make toolbar labels clickable
@@ -413,6 +411,7 @@ addGlobalEventListener('click', '.arrow', (e) => {
   task.dataset.positions = tooltipPosition.join('|')
 })
 
+// submit edited task
 addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   e.preventDefault()
   const input = e.target.elements['task-title']
@@ -445,9 +444,8 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 // Create task HTML
 function createTaskHTML({ id, text, notes = null, tooltipPosition = '' } = {}) {
   return `
-  <div class="task" data-draggable data-task-id=${id} data-tooltip="${
-    notes ?? ''
-  }" data-spacing="15" data-positions=${tooltipPosition}>
+  <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
+    }" data-spacing="15" data-positions=${tooltipPosition}>
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
