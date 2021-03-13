@@ -58,18 +58,21 @@ function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
 addGlobalEventListener('submit', '[data-task-form]', (e) => {
   e.preventDefault()
   e.target.classList.remove('show-add-button')
-
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = taskInput.value
   if (taskText === '') return
   const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '' }
-  const laneElement = e.target.closest('.lane').querySelector('[data-lane-id]')
-  const laneId = laneElement.dataset.laneId
+  const lane = e.target.closest('.lane')
+  const laneId = lane.dataset.id
+  const tasksContainer = lane.querySelector('.tasks')
 
-  lanes.find((i) => i.name === laneId).tasks.push(newTask)
+
+
+  lanes.find((lane) => lane.id === laneId).tasks.push(newTask)
+  // console.log(lanes)
 
   const taskElement = createTaskHTML(newTask)
-  laneElement.innerHTML += taskElement
+  tasksContainer.innerHTML += taskElement
   taskInput.value = ''
 
   saveLanes()
@@ -364,11 +367,13 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const taskNotes = task.dataset.tooltip
   const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
   const fontSize = parseFloat(task.dataset.fontSize)
+  const arrowSize = parseFloat(task.dataset.arrowSize)
   const radioButton = tasksContainer.querySelector(`.tooltip-font-size-input[value='${fontSize}']`)
   const fgInput = tasksContainer.querySelector('[data-tooltip-fg-input]')
   const bgInput = tasksContainer.querySelector('[data-tooltip-bg-input]')
   const bgColor = task.dataset.bgColor
   const fgColor = task.dataset.fgColor
+  const arrowToggle = tasksContainer.querySelector('[data-arrow-toggle]')
 
   input.value = taskTitle
   textarea.value = taskNotes
@@ -378,6 +383,7 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   radioButton.checked = true
   fgInput.value = fgColor
   bgInput.value = bgColor
+  arrowToggle.checked = arrowSize === 0 ? false : true
 
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
@@ -445,7 +451,8 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 
   const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
   const task = tasks.find((t) => t.id === taskId)
-
+  console.log(tasks)
+  console.log(task)
   task.text = newTitle
   task.notes = newNotes
   task.tooltipPosition = $task.dataset.positions
@@ -474,19 +481,25 @@ function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize
   </div>`
 }
 
-addGlobalEventListener('change', '.tooltip-font-size-input', e => {
-  console.log(typeof (e.target.value))
-  const input = e.target
-  const fontSize = Number(e.target.value)
+// tooltip font size input
+addGlobalEventListener('input', '.tooltip-font-size-input', e => {
+  const fontSize = parseFloat(e.target.value)
   const tasksContainer = e.target.closest('.tasks')
   const textarea = tasksContainer.querySelector('.edit-task-notes')
   const taskId = tasksContainer.dataset.taskId
   const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+
   task.dataset.fontSize = `${fontSize}rem`
   task.dataset.arrowSize = `${fontSize + 0.5}rem`
   console.log(task)
 
   textarea.style.fontSize = `${fontSize}rem`
+})
+// tooltip font size input
+addGlobalEventListener('click', '[data-font-size-label]', e => {
+  const value = e.target.dataset.fontSizeLabel
+  const input = e.target.parentElement.querySelector(`.tooltip-font-size-input[value="${value}"]`)
+  if (input) input.click()
 })
 
 function createEditFormHTML() {
@@ -494,7 +507,7 @@ function createEditFormHTML() {
   <form data-edit-task-form class="task-edit-form">
     <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
     <div class="task-edit-form__notes-settings">
-      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增備註&#10;2. 選擇提示框的位置順序" autoComplete="off"></textarea>
+      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增文字&#10;2. 自訂顏色&#10;3. 自訂提示框的顯示順位" autoComplete="off"></textarea>
       <button type="button" data-position="top" class="arrow arrow-up">&darr;</button>
       <button type="button" data-position="left" class="arrow arrow-left">&rarr;</button>
       <button type="button" data-position="right" class="arrow arrow-right">&larr;</button>
@@ -506,25 +519,45 @@ function createEditFormHTML() {
     </div>
     <div class="task-edit-form__tooltip-styles" >
       <div>字體
-        <input type="radio" value=2 id="big" name="size" class="tooltip-font-size-input">
-        <label for="big">大</label>
-        <input type="radio" value=1.5 id="medium" name="size" class="tooltip-font-size-input">
-        <label for="medium">中</label>  
-        <input type="radio" value=1 id="small" name="size" class="tooltip-font-size-input">
-        <label for="small">小</label>
-      </div>
-      <input type="checkbox" id="arrow-toggler" class="">
-      <label for="arrow-toggler">顯示箭頭</label>
+        <input type="radio" value=2 id="" name="size" class="tooltip-font-size-input">
+        <label data-font-size-label=2 class="font-size-big">大</label>
 
-      <input type="color" id="tooltip-bg" data-tooltip-bg-input>
-      <label for="tooltip-bg">背景色</label>
-      <input type="color" id="tooltip-fg" data-tooltip-fg-input>
-      <label for="tooltip-fg">字體色</label>
+        <input type="radio" value=1.5 id="" name="size" class="tooltip-font-size-input">
+        <label data-font-size-label=1.5 class="font-size-medium">中</label>  
+
+        <input type="radio" value=1 id="" name="size" class="tooltip-font-size-input">
+        <label data-font-size-label=1 class="font-size-small">小</label>
+
+      </div>
+      <input type="checkbox" data-arrow-toggle checked>
+      <label data-arrow-toggle-label>顯示箭頭</label>
+
+      <input type="color" data-tooltip-bg-input>
+      <label data-tooltip-color-input-label="bg">背景色</label>
+      <input type="color" data-tooltip-fg-input>
+      <label data-tooltip-color-input-label="fg">字體色</label>
       
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
   </form>`
 }
+
+addGlobalEventListener('change', '[data-arrow-toggle]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const fontSize = parseFloat(task.dataset.fontSize)
+  const arrowToggle = e.target
+
+  task.dataset.arrowSize = arrowToggle.checked ? `${fontSize + 0.5}rem` : "0rem"
+})
+
+addGlobalEventListener('click', '[data-arrow-toggle-label]', e => {
+  const input = e.target.parentElement.querySelector('[data-arrow-toggle]')
+  if (input) input.click()
+})
+
+
 
 addGlobalEventListener('input', '[data-tooltip-fg-input]', e => {
   const tasksContainer = e.target.closest('.tasks')
@@ -548,7 +581,13 @@ addGlobalEventListener('input', '[data-tooltip-bg-input]', e => {
 
   task.dataset.bgColor = bgColor
   textarea.style.backgroundColor = bgColor
+})
 
+addGlobalEventListener('click', '[data-tooltip-color-input-label]', e => {
+  console.log(e.target)
+  const value = e.target.dataset.tooltipColorInputLabel
+  const input = e.target.parentElement.querySelector(`[data-tooltip-${value}-input]`)
+  if (input) input.click()
 })
 
 
