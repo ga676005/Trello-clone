@@ -43,13 +43,25 @@ addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   e.target.addEventListener(
     'mouseleave',
     () => {
-      tooltip.remove()
+      // tooltip.remove()
     },
     { once: true }
   )
 })
 
 function creatTooltipHTML(text) {
+  return `
+  <div class="tooltip-outer">
+    <div class="tooltip">${text}</div>
+    <div class="tooltip-arrow tooltip-arrow-top ">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-right">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-left">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-left">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-top-right">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-top-left">&#10148;</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-right">&#10148;</div>
+  </div>`
   return `
   <div class="tooltip-outer">
     <div class="tooltip">${text}</div>
@@ -359,6 +371,6 @@ function positionTooltipBottomLeft(tooltip, elementRect, spacing) {
 
 function positionTooltipArrow(direction) {
   const arrow = tooltipContainer.querySelector(`.tooltip-arrow-${direction}`)
-  arrow.classList.add('show')
+  arrow.classList.add('animate-tooltip')
 }
 

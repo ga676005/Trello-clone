@@ -302,13 +302,13 @@ button {
 
 .arrow.is-selected::before {
   content: attr(data-order);
-  color: rgba(0, 0, 0, 0.308);
+  color: rgba(0, 0, 0);
   position: absolute;
   font-size: 2rem;
-  top: 0;
+  top: -1rem;
   left: 0;
-  z-index: -1;
-  font-weight: 200;
+  z-index: 1;
+  font-weight: 500;
 }
 
 .edit-task-notes:hover ~ .arrow,
@@ -368,7 +368,6 @@ button {
 }
 .arrow-left {
   grid-area: left;
-
   background-image: linear-gradient(
     90deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -449,6 +448,46 @@ button {
 .arrow-nw:hover {
   background-position: 0px 0px;
 }
+/* 
+.box {
+  opacity: 0;
+  display: none;
+  z-index: -1;
+}
+
+.box-up {
+  grid-area: top;
+}
+.box-left {
+  grid-area: left;
+}
+.box-right {
+  grid-area: right;
+}
+.box-down {
+  grid-area: bottom;
+}
+.box-nw {
+  grid-area: top-left;
+}
+.box-ne {
+  grid-area: top-right;
+}
+.box-sw {
+  grid-area: bottom-left;
+}
+.box-se {
+  grid-area: bottom-right;
+}
+
+.hide-arrow .arrow {
+  opacity: 0 !important;
+}
+
+.hide-arrow .box {
+  opacity: 1;
+  z-index: 1;
+} */
 /* #endregion arrows */
 
 /* #endregion edit task */
@@ -745,7 +784,7 @@ ion-icon:hover {
   box-shadow: 0px 0px 5px rgba(1, 1, 1, 0.2), 0px 0px 5px var(--tooltip-bg-clr);
   font-weight: 300;
   border: 2px solid black;
-  border-image: linear-gradient(-45deg, var(--tooltip-bg-clr), var(--tooltip-fg-clr)) 1;
+  border-image: linear-gradient(-25deg, var(--tooltip-bg-clr), var(--tooltip-fg-clr)) 1;
   filter: drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.5));
 }
 
@@ -768,38 +807,72 @@ ion-icon:hover {
   font-size: var(--tooltip-arrow-fs);
   font-weight: 900;
   z-index: -1;
-  opacity: 0;
   color: var(--tooltip-bg-clr);
-  filter: drop-shadow(5px 10px 2px rgba(0, 0, 0, 0.5));
-}
-.tooltip-arrow.show {
-  opacity: 1;
+  filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.4));
 }
 
-.tooltip {
-  grid-area: m;
+.tooltip-arrow {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-repeat: no-repeat;
+  background-size: 200px 200px;
+  background-position-x: -200px;
+
+  background-image: linear-gradient(
+    -90deg,
+    transparent,
+    var(--tooltip-bg-clr) 30% 70%,
+    transparent
+  );
+
+  animation: flashArrow 4s ease infinite normal;
+  animation-play-state: paused;
 }
+
+.animate-tooltip {
+  animation-play-state: running;
+}
+
 .tooltip-arrow-top {
   grid-area: t;
+  transform: rotate(-90deg);
 }
 .tooltip-arrow-right {
   grid-area: r;
+  transform: rotate(0deg);
 }
 .tooltip-arrow-bottom {
   grid-area: b;
+  transform: rotate(90deg);
 }
 .tooltip-arrow-left {
   grid-area: l;
+  transform: rotate(180deg);
 }
+
 .tooltip-arrow-bottom-left {
   grid-area: bl;
+  transform: rotate(135deg);
 }
 .tooltip-arrow-top-right {
   grid-area: tr;
+  transform: rotate(-45deg);
 }
 .tooltip-arrow-top-left {
   grid-area: tl;
+  transform: rotate(-135deg);
 }
 .tooltip-arrow-bottom-right {
   grid-area: br;
+  transform: rotate(45deg);
+}
+
+@keyframes flashArrow {
+  0% {
+    background-position-x: -200px;
+  }
+  100% {
+    background-position-x: 50px;
+  }
 }
