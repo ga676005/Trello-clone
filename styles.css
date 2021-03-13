@@ -11,6 +11,10 @@
   --box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.005), 0 6.7px 5.3px rgba(0, 0, 0, 0.011),
     0 12.5px 10px rgba(0, 0, 0, 0.018), 0 22.3px 17.9px rgba(0, 0, 0, 0.026),
     0 41.8px 33.4px rgba(0, 0, 0, 0.038), 0 100px 80px rgba(0, 0, 0, 0.06);
+
+  --tooltip-base-fs: 1rem;
+  --tooltip-width: 18ch;
+  --tooltip-padding: 0.3em;
 }
 
 *,
@@ -230,21 +234,26 @@ button {
 .edit-task-notes {
   color: var(--clr-neutral-800);
   background-color: hsl(var(--clr-secondary));
-
-  margin: 1rem;
   box-shadow: 0px 2px 5px hsla(var(--clr-primary), 0.5),
     0px 10px 10px hsl(var(--clr-secondary), 0.3);
 }
 
 .edit-task-input {
+  margin: 1rem;
   margin-bottom: 0;
   padding-left: 0.5rem;
 }
 
 .edit-task-notes {
-  font-size: 1rem;
+  font-size: var(--tooltip-base-fs);
+  padding: var(--tooltip-padding);
+  max-width: var(--tooltip-width);
   min-width: 0;
   scrollbar-width: none;
+  margin: 0.5rem;
+  line-height: 1.2;
+  border-radius: 0.25rem;
+  font-weight: 300;
 }
 .edit-task-notes::-webkit-scrollbar {
   display: none;
@@ -275,6 +284,7 @@ button {
 }
 /* #region edit notes and arrows */
 .task-edit-form__notes-settings {
+  justify-self: center;
   display: grid;
   padding: 0.7rem;
   grid-template-columns: min-content 1fr min-content;
@@ -283,6 +293,7 @@ button {
     'top-left      top         top-right'
     'left          textarea        right'
     'bottom-left   bottom   bottom-right';
+  justify-items: center;
 }
 
 .edit-task-notes {
@@ -291,7 +302,7 @@ button {
 
 .arrow.is-selected::before {
   content: attr(data-order);
-  color: rgba(0, 0, 0, 0.151);
+  color: rgba(0, 0, 0, 0.308);
   position: absolute;
   font-size: 2rem;
   top: 0;
@@ -306,6 +317,7 @@ button {
 }
 
 .arrow {
+  padding: 0.1em;
   position: relative;
   align-self: center;
   justify-self: center;
@@ -327,8 +339,8 @@ button {
   color: hsla(var(--clr-modifier), 100%, 55%, 1);
 }
 
-.arrow-up {
-  grid-area: top;
+.arrow-down {
+  grid-area: bottom;
   background-image: linear-gradient(
     0deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -337,11 +349,12 @@ button {
   );
   background-position-y: 0;
 }
-.arrow-up:hover {
+.arrow-down:hover {
   background-position-y: -50px;
 }
-.arrow-left {
-  grid-area: left;
+.arrow-right {
+  grid-area: right;
+
   background-image: linear-gradient(
     -90deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -350,11 +363,12 @@ button {
   );
   background-position-x: 0px;
 }
-.arrow-left:hover {
+.arrow-right:hover {
   background-position-x: -50px;
 }
-.arrow-right {
-  grid-area: right;
+.arrow-left {
+  grid-area: left;
+
   background-image: linear-gradient(
     90deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -363,11 +377,11 @@ button {
   );
   background-position-x: -50px;
 }
-.arrow-right:hover {
+.arrow-left:hover {
   background-position-x: 0px;
 }
-.arrow-down {
-  grid-area: bottom;
+.arrow-up {
+  grid-area: top;
   background-image: linear-gradient(
     180deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -377,12 +391,12 @@ button {
   background-position-y: -50px;
 }
 
-.arrow-down:hover {
+.arrow-up:hover {
   background-position-y: 0;
 }
 
-.arrow-nw {
-  grid-area: top-left;
+.arrow-se {
+  grid-area: bottom-right;
   background-image: linear-gradient(
     -45deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -391,11 +405,11 @@ button {
   );
   background-position: 0px 0px;
 }
-.arrow-nw:hover {
+.arrow-se:hover {
   background-position: -50px -50px;
 }
-.arrow-ne {
-  grid-area: top-right;
+.arrow-sw {
+  grid-area: bottom-left;
   background-image: linear-gradient(
     45deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -404,11 +418,11 @@ button {
   );
   background-position: -50px 0px;
 }
-.arrow-ne:hover {
+.arrow-sw:hover {
   background-position: 0px -50px;
 }
-.arrow-sw {
-  grid-area: bottom-left;
+.arrow-ne {
+  grid-area: top-right;
   background-image: linear-gradient(
     -135deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -417,12 +431,12 @@ button {
   );
   background-position: 0px -50px;
 }
-.arrow-sw:hover {
+.arrow-ne:hover {
   background-position: -50px 0px;
 }
 
-.arrow-se {
-  grid-area: bottom-right;
+.arrow-nw {
+  grid-area: top-left;
   background-image: linear-gradient(
     135deg,
     hsla(var(--clr-modifier), 100%, 50%, 1) 0%,
@@ -432,7 +446,7 @@ button {
   background-position: -50px -50px;
 }
 
-.arrow-se:hover {
+.arrow-nw:hover {
   background-position: 0px 0px;
 }
 /* #endregion arrows */
@@ -722,13 +736,17 @@ ion-icon:hover {
 }
 
 .tooltip {
-  padding: 0.3em;
+  font-size: var(--tooltip-fs, var(--tooltip-base-fs));
+  padding: var(--tooltip-padding);
+  max-width: var(--tooltip-width);
   border-radius: 0.25rem;
-  font-size: var(--tooltip-fs, 0.75rem);
-  max-width: 16ch;
   background-color: var(--tooltip-bg-clr, rgb(255, 255, 255));
   color: var(--tooltip-fg-clr, rgba(17, 17, 17, 0.87));
   box-shadow: 0px 0px 5px rgba(1, 1, 1, 0.2), 0px 0px 5px var(--tooltip-bg-clr);
+  font-weight: 300;
+  border: 2px solid black;
+  border-image: linear-gradient(-45deg, var(--tooltip-bg-clr), var(--tooltip-fg-clr)) 1;
+  filter: drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.5));
 }
 
 .tooltip-outer {
@@ -751,6 +769,8 @@ ion-icon:hover {
   font-weight: 900;
   z-index: -1;
   opacity: 0;
+  color: var(--tooltip-bg-clr);
+  filter: drop-shadow(5px 10px 2px rgba(0, 0, 0, 0.5));
 }
 .tooltip-arrow.show {
   opacity: 1;

@@ -365,11 +365,19 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
   const fontSize = parseFloat(task.dataset.fontSize)
   const radioButton = tasksContainer.querySelector(`.tooltip-font-size-input[value='${fontSize}']`)
+  const fgInput = tasksContainer.querySelector('[data-tooltip-fg-input]')
+  const bgInput = tasksContainer.querySelector('[data-tooltip-bg-input]')
+  const bgColor = task.dataset.bgColor
+  const fgColor = task.dataset.fgColor
 
   input.value = taskTitle
   textarea.value = taskNotes
   textarea.style.fontSize = `${fontSize}rem`
-  // radioButton.checked = true
+  textarea.style.color = fgColor
+  textarea.style.backgroundColor = bgColor
+  radioButton.checked = true
+  fgInput.value = fgColor
+  bgInput.value = bgColor
 
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
@@ -443,6 +451,8 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   task.tooltipPosition = $task.dataset.positions
   task.fontSize = $task.dataset.fontSize
   task.arrowSize = $task.dataset.arrowSize
+  task.fgColor = $task.dataset.fgColor
+  task.bgColor = $task.dataset.bgColor
 
   console.log(task)
 
@@ -454,10 +464,10 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 })
 
 // Create task HTML
-function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem" } = {}) {
+function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000", bgColor = "#f7f7f7" } = {}) {
   return `
   <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
-    }" data-spacing="0" data-positions=${tooltipPosition} data-font-size=${fontSize} data-arrow-size=${arrowSize}>
+    }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}">
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
@@ -485,14 +495,14 @@ function createEditFormHTML() {
     <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
     <div class="task-edit-form__notes-settings">
       <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增備註&#10;2. 選擇提示框的位置順序" autoComplete="off"></textarea>
-      <button type="button" data-position="top" class="arrow arrow-up">&uarr;</button>
-      <button type="button" data-position="left" class="arrow arrow-left">&larr;</button>
-      <button type="button" data-position="right" class="arrow arrow-right">&rarr;</button>
-      <button type="button" data-position="bottom" class="arrow arrow-down">&darr;</button>
-      <button type="button" data-position="topLeft" class="arrow arrow-nw">&nwarr;</button>
-      <button type="button" data-position="topRight" class="arrow arrow-ne">&nearr;</button>
-      <button type="button" data-position="bottomLeft" class="arrow arrow-sw">&swarr;</button>
-      <button type="button" data-position="bottomRight" class="arrow arrow-se">&searr;</button>
+      <button type="button" data-position="top" class="arrow arrow-up">&darr;</button>
+      <button type="button" data-position="left" class="arrow arrow-left">&rarr;</button>
+      <button type="button" data-position="right" class="arrow arrow-right">&larr;</button>
+      <button type="button" data-position="bottom" class="arrow arrow-down">&uarr;</button>
+      <button type="button" data-position="topLeft" class="arrow arrow-nw">&searr;</button>
+      <button type="button" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
+      <button type="button" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
+      <button type="button" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
     </div>
     <div class="task-edit-form__tooltip-styles" >
       <div>字體
@@ -506,11 +516,41 @@ function createEditFormHTML() {
       <input type="checkbox" id="arrow-toggler" class="">
       <label for="arrow-toggler">顯示箭頭</label>
 
-      <input type="color" id="" >
+      <input type="color" id="tooltip-bg" data-tooltip-bg-input>
+      <label for="tooltip-bg">背景色</label>
+      <input type="color" id="tooltip-fg" data-tooltip-fg-input>
+      <label for="tooltip-fg">字體色</label>
+      
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
   </form>`
 }
+
+addGlobalEventListener('input', '[data-tooltip-fg-input]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const fgColor = e.target.value
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+
+
+  task.dataset.fgColor = fgColor
+  textarea.style.color = fgColor
+})
+
+addGlobalEventListener('input', '[data-tooltip-bg-input]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const bgColor = e.target.value
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+
+
+  task.dataset.bgColor = bgColor
+  textarea.style.backgroundColor = bgColor
+
+})
+
 
 // Create lane HTML
 function createLaneHTML({ id, name, color, tasks = '' } = {}) {
