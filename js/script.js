@@ -66,10 +66,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const laneId = lane.dataset.id
   const tasksContainer = lane.querySelector('.tasks')
 
-
-
   lanes.find((lane) => lane.id === laneId).tasks.push(newTask)
-  // console.log(lanes)
 
   const taskElement = createTaskHTML(newTask)
   tasksContainer.innerHTML += taskElement
@@ -386,6 +383,7 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   arrowToggle.checked = arrowSize === 0 ? false : true
 
   tasksContainer.classList.add('show-edit-form')
+  tasksContainer.classList.toggle('hide-arrow', !arrowToggle.checked)
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
 
@@ -396,6 +394,7 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
     if (tooltipPosition.some((p) => p === btn.dataset.position)) {
       btn.classList.add('is-selected')
     }
+    btn.innerHTML = arrowToggle.checked ? btn.dataset.arrow : "&#10063;"
   })
   showPositionOrderNumber(tooltipPosition, buttons)
 })
@@ -461,10 +460,6 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   task.fgColor = $task.dataset.fgColor
   task.bgColor = $task.dataset.bgColor
 
-  console.log(task)
-
-
-
   saveLanes()
 
   tasksContainer.classList.remove('show-edit-form')
@@ -491,7 +486,6 @@ addGlobalEventListener('input', '.tooltip-font-size-input', e => {
 
   task.dataset.fontSize = `${fontSize}rem`
   task.dataset.arrowSize = `${fontSize + 0.5}rem`
-  console.log(task)
 
   textarea.style.fontSize = `${fontSize}rem`
 })
@@ -508,14 +502,14 @@ function createEditFormHTML() {
     <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
     <div class="task-edit-form__notes-settings">
       <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增文字&#10;2. 自訂顏色&#10;3. 自訂提示框的顯示順位" autoComplete="off"></textarea>
-      <button type="button" data-position="top" class="arrow arrow-up">&darr;</button>
-      <button type="button" data-position="left" class="arrow arrow-left">&rarr;</button>
-      <button type="button" data-position="right" class="arrow arrow-right">&larr;</button>
-      <button type="button" data-position="bottom" class="arrow arrow-down">&uarr;</button>
-      <button type="button" data-position="topLeft" class="arrow arrow-nw">&searr;</button>
-      <button type="button" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
-      <button type="button" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
-      <button type="button" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
+      <button type="button" data-arrow="&darr;" data-position="top" class="arrow arrow-up">&darr;</button>
+      <button type="button" data-arrow="&rarr;" data-position="left" class="arrow arrow-left">&rarr;</button>
+      <button type="button" data-arrow="&larr;" data-position="right" class="arrow arrow-right">&larr;</button>
+      <button type="button" data-arrow="&uarr;" data-position="bottom" class="arrow arrow-down">&uarr;</button>
+      <button type="button" data-arrow="&searr;" data-position="topLeft" class="arrow arrow-nw">&searr;</button>
+      <button type="button" data-arrow="&swarr;" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
+      <button type="button" data-arrow="&nearr;" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
+      <button type="button" data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
     </div>
     <div class="task-edit-form__tooltip-styles" >
       <div>字體
@@ -529,19 +523,23 @@ function createEditFormHTML() {
         <label data-font-size-label=1 class="font-size-small">小</label>
 
       </div>
+
       <input type="checkbox" data-arrow-toggle checked>
       <label data-arrow-toggle-label>顯示箭頭</label>
 
+      <label data-tooltip-color-input-label="bg">背景</label>
       <input type="color" data-tooltip-bg-input>
-      <label data-tooltip-color-input-label="bg">背景色</label>
+
+      <label data-tooltip-color-input-label="fg">字</label>
       <input type="color" data-tooltip-fg-input>
-      <label data-tooltip-color-input-label="fg">字體色</label>
       
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
   </form>`
 }
 
+
+// arrow toggle
 addGlobalEventListener('change', '[data-arrow-toggle]', e => {
   const tasksContainer = e.target.closest('.tasks')
   const taskId = tasksContainer.dataset.taskId
@@ -549,7 +547,15 @@ addGlobalEventListener('change', '[data-arrow-toggle]', e => {
   const fontSize = parseFloat(task.dataset.fontSize)
   const arrowToggle = e.target
 
+  tasksContainer.classList.toggle('hide-arrow', !arrowToggle.checked)
+
   task.dataset.arrowSize = arrowToggle.checked ? `${fontSize + 0.5}rem` : "0rem"
+
+
+  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
+  buttons.forEach((btn) => {
+    btn.innerHTML = arrowToggle.checked ? btn.dataset.arrow : "&#10063;"
+  })
 })
 
 addGlobalEventListener('click', '[data-arrow-toggle-label]', e => {
