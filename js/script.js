@@ -358,7 +358,7 @@ function setupHideElementEvents(element, selector, className, targetElements) {
 addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const task = e.target.closest('.task')
   const tasksContainer = e.target.closest('.tasks')
-  const input = tasksContainer.querySelector('.edit-task-input')
+  const titleInput = tasksContainer.querySelector('.edit-task-input')
   const textarea = tasksContainer.querySelector('.edit-task-notes')
   const taskTitle = task.querySelector('.task-title').textContent.trim()
   const taskNotes = task.dataset.tooltip
@@ -370,9 +370,11 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const bgInput = tasksContainer.querySelector('[data-tooltip-bg-input]')
   const bgColor = task.dataset.bgColor
   const fgColor = task.dataset.fgColor
-  const arrowToggle = tasksContainer.querySelector('[data-arrow-toggle]')
+  const showArrow = arrowSize > 0
+  const arrowOnToggle = tasksContainer.querySelector('[data-arrow-toggle="ON"]')
+  const arrowOffToggle = tasksContainer.querySelector('[data-arrow-toggle="OFF"]')
 
-  input.value = taskTitle
+  titleInput.value = taskTitle
   textarea.value = taskNotes
   textarea.style.fontSize = `${fontSize}rem`
   textarea.style.color = fgColor
@@ -380,21 +382,18 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   radioButton.checked = true
   fgInput.value = fgColor
   bgInput.value = bgColor
-  arrowToggle.checked = arrowSize === 0 ? false : true
+  showArrow ? arrowOnToggle.checked = true : arrowOffToggle.checked = true
 
   tasksContainer.classList.add('show-edit-form')
-  tasksContainer.classList.toggle('hide-arrow', !arrowToggle.checked)
   tasksContainer.dataset.taskId = task.dataset.taskId
   tasksContainer.dataset.taskTitle = taskTitle
-
-
 
   const buttons = [...tasksContainer.querySelectorAll('.arrow')]
   buttons.forEach((btn) => {
     if (tooltipPosition.some((p) => p === btn.dataset.position)) {
       btn.classList.add('is-selected')
     }
-    btn.innerHTML = arrowToggle.checked ? btn.dataset.arrow : "&#10063;"
+    btn.innerHTML = showArrow ? btn.dataset.arrow : "&#10063;"
   })
   showPositionOrderNumber(tooltipPosition, buttons)
 })
@@ -450,8 +449,7 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 
   const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
   const task = tasks.find((t) => t.id === taskId)
-  console.log(tasks)
-  console.log(task)
+
   task.text = newTitle
   task.notes = newNotes
   task.tooltipPosition = $task.dataset.positions
@@ -512,26 +510,38 @@ function createEditFormHTML() {
       <button type="button" data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
     </div>
     <div class="task-edit-form__tooltip-styles" >
-      <div>字體
-        <input type="radio" value=2 id="" name="size" class="tooltip-font-size-input">
-        <label data-font-size-label=2 class="font-size-big">大</label>
+      <div class="wrapper">
+        <div>
+          <span>字體:</span>
+          <input type="radio" value=2 id="" name="size"   class="tooltip-font-size-input" hidden>
+          <label data-font-size-label=2 class="font-size-big">大</label>
 
-        <input type="radio" value=1.5 id="" name="size" class="tooltip-font-size-input">
-        <label data-font-size-label=1.5 class="font-size-medium">中</label>  
+          <input type="radio" value=1.5 id="" name="size"   class="tooltip-font-size-input" hidden>
+          <label data-font-size-label=1.5 class="font-size-medium">中</label>  
 
-        <input type="radio" value=1 id="" name="size" class="tooltip-font-size-input">
-        <label data-font-size-label=1 class="font-size-small">小</label>
+          <input type="radio" value=1 id="" name="size"   class="tooltip-font-size-input" hidden>
+          <label data-font-size-label=1 class="font-size-small">小</label>
+        </div>
 
+        <div>
+          <label data-tooltip-color-input-label="bg">背景</label>
+          <input type="color" data-tooltip-bg-input>
+        </div>  
+  
+        <div>  
+          <label data-tooltip-color-input-label="fg">字</label>
+          <input type="color" data-tooltip-fg-input>
+        </div>  
       </div>
-
-      <input type="checkbox" data-arrow-toggle checked>
-      <label data-arrow-toggle-label>顯示箭頭</label>
-
-      <label data-tooltip-color-input-label="bg">背景</label>
-      <input type="color" data-tooltip-bg-input>
-
-      <label data-tooltip-color-input-label="fg">字</label>
-      <input type="color" data-tooltip-fg-input>
+      <div class="wrapper">
+        <div>
+          <span>箭頭:</span>
+          <input type="radio" value="ON"  name="arrow-toggle"   data-arrow-toggle="ON" hidden>
+          <label data-arrow-toggle-label="ON">ON</label>
+          <input type="radio" value="OFF" name="arrow-toggle"   data-arrow-toggle="OFF" hidden>
+          <label data-arrow-toggle-label="OFF">OFF</label>
+        </div>
+      </div>
       
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
@@ -545,21 +555,22 @@ addGlobalEventListener('change', '[data-arrow-toggle]', e => {
   const taskId = tasksContainer.dataset.taskId
   const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
   const fontSize = parseFloat(task.dataset.fontSize)
-  const arrowToggle = e.target
+  const status = e.target.value
 
-  tasksContainer.classList.toggle('hide-arrow', !arrowToggle.checked)
+  console.log(e.target)
 
-  task.dataset.arrowSize = arrowToggle.checked ? `${fontSize + 0.5}rem` : "0rem"
-
+  task.dataset.arrowSize = status === "ON" ? `${fontSize + 0.5}rem` : "0rem"
 
   const buttons = [...tasksContainer.querySelectorAll('.arrow')]
   buttons.forEach((btn) => {
-    btn.innerHTML = arrowToggle.checked ? btn.dataset.arrow : "&#10063;"
+    btn.innerHTML = status === "ON" ? btn.dataset.arrow : "&#10063;"
   })
 })
 
 addGlobalEventListener('click', '[data-arrow-toggle-label]', e => {
-  const input = e.target.parentElement.querySelector('[data-arrow-toggle]')
+  const value = e.target.dataset.arrowToggleLabel
+  const input = e.target.parentElement.querySelector(`[data-arrow-toggle=${value}]`)
+
   if (input) input.click()
 })
 
@@ -590,7 +601,6 @@ addGlobalEventListener('input', '[data-tooltip-bg-input]', e => {
 })
 
 addGlobalEventListener('click', '[data-tooltip-color-input-label]', e => {
-  console.log(e.target)
   const value = e.target.dataset.tooltipColorInputLabel
   const input = e.target.parentElement.querySelector(`[data-tooltip-${value}-input]`)
   if (input) input.click()
