@@ -393,21 +393,27 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
     if (tooltipPosition.some((p) => p === btn.dataset.position)) {
       btn.classList.add('is-selected')
     }
-    btn.innerHTML = showArrow ? btn.dataset.arrow : "&#10063;"
+    btn.querySelector('.arrow-box').innerHTML = showArrow ? btn.dataset.arrow : "&#10063;"
   })
   showPositionOrderNumber(tooltipPosition, buttons)
 })
 
 //Show tooltip position order number besides arrows
 function showPositionOrderNumber(tooltipPosition, buttons) {
+  buttons.forEach(b => b.querySelector('.num-box').innerHTML = "")
   tooltipPosition.forEach((position, index) => {
     const btn = buttons.find((b) => b.dataset.position === position)
     if (btn) {
-      btn.dataset.order = index + 1
+      const numCode = `&#1010${index + 2};`
+      const numCode2 = `&#1011${index + 2};`
+      const numBox = btn.querySelector('.num-box');
+      // btn.dataset.order = index + 1
+      numBox.innerHTML = numCode
     }
   })
 }
 
+// edit task arrows
 addGlobalEventListener('click', '.arrow', (e) => {
   const button = e.target
   const buttons = [...button.parentElement.querySelectorAll('.arrow')]
@@ -416,7 +422,6 @@ addGlobalEventListener('click', '.arrow', (e) => {
   const taskId = tasksContainer.dataset.taskId
   const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
   let tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
-
   button.classList.toggle('is-selected')
   const isSelected = button.classList.contains('is-selected')
 
@@ -464,7 +469,7 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 })
 
 // Create task HTML
-function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
+function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
   return `
   <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
     }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}" data-arrow="${arrowStyle}">
@@ -500,14 +505,39 @@ function createEditFormHTML() {
     <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
     <div class="task-edit-form__notes-settings">
       <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增文字&#10;2. 自訂顏色&#10;3. 自訂提示框的顯示順位" autoComplete="off"></textarea>
-      <button type="button" data-arrow="&darr;" data-position="top" class="arrow arrow-up">&darr;</button>
-      <button type="button" data-arrow="&rarr;" data-position="left" class="arrow arrow-left">&rarr;</button>
-      <button type="button" data-arrow="&larr;" data-position="right" class="arrow arrow-right">&larr;</button>
-      <button type="button" data-arrow="&uarr;" data-position="bottom" class="arrow arrow-down">&uarr;</button>
-      <button type="button" data-arrow="&searr;" data-position="topLeft" class="arrow arrow-nw">&searr;</button>
-      <button type="button" data-arrow="&nearr;" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
-      <button type="button" data-arrow="&swarr;" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
-      <button type="button" data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
+      
+      <div data-arrow="&darr;" data-position="top" class="arrow arrow-up">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&rarr;" data-position="left" class="arrow arrow-left">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&larr;" data-position="right" class="arrow arrow-right">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&uarr;" data-position="bottom" class="arrow arrow-down">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&searr;" data-position="topLeft" class="arrow arrow-nw">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&swarr;" data-position="topRight" class="arrow arrow-ne">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&nearr;" data-position="bottomLeft" class="arrow arrow-sw">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
+      <div data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">
+        <div class="arrow-box"></div>
+        <div class="num-box"></div>
+      </div>
     </div>
     <div class="task-edit-form__tooltip-styles" >
       <div class="wrapper">
@@ -563,7 +593,7 @@ addGlobalEventListener('change', '[data-arrow-toggle]', e => {
 
   const buttons = [...tasksContainer.querySelectorAll('.arrow')]
   buttons.forEach((btn) => {
-    btn.innerHTML = status === "ON" ? btn.dataset.arrow : "&#10063;"
+    btn.querySelector('.arrow-box').innerHTML = status === "ON" ? btn.dataset.arrow : "&#10063;"
   })
 })
 
