@@ -464,10 +464,10 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 })
 
 // Create task HTML
-function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000", bgColor = "#f7f7f7" } = {}) {
+function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
   return `
   <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
-    }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}">
+    }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}" data-arrow="${arrowStyle}">
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
@@ -505,8 +505,8 @@ function createEditFormHTML() {
       <button type="button" data-arrow="&larr;" data-position="right" class="arrow arrow-right">&larr;</button>
       <button type="button" data-arrow="&uarr;" data-position="bottom" class="arrow arrow-down">&uarr;</button>
       <button type="button" data-arrow="&searr;" data-position="topLeft" class="arrow arrow-nw">&searr;</button>
-      <button type="button" data-arrow="&swarr;" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
-      <button type="button" data-arrow="&nearr;" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
+      <button type="button" data-arrow="&nearr;" data-position="topRight" class="arrow arrow-ne">&swarr;</button>
+      <button type="button" data-arrow="&swarr;" data-position="bottomLeft" class="arrow arrow-sw">&nearr;</button>
       <button type="button" data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">&nwarr;</button>
     </div>
     <div class="task-edit-form__tooltip-styles" >

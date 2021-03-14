@@ -25,11 +25,11 @@ document.body.append(tooltipContainer)
 
 addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   if (e.target.dataset.tooltip.trim() === '') return
-  tooltipContainer.innerHTML = creatTooltipHTML(e.target.dataset.tooltip)
+  const { tooltip: tooltipText, bgColor, fgColor, fontSize, arrowSize, spacing, arrow } = e.target.dataset
 
+  tooltipContainer.innerHTML = creatTooltipHTML(tooltipText, arrow)
 
   const tooltip = tooltipContainer.children[0]
-  const { bgColor, fgColor, fontSize, arrowSize, spacing } = e.target.dataset
 
   //tooltip style
   tooltipContainer.style.setProperty('--tooltip-bg-clr', bgColor ?? defaultBgColor)
@@ -43,36 +43,24 @@ addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   e.target.addEventListener(
     'mouseleave',
     () => {
-      // tooltip.remove()
+      tooltip.remove()
     },
     { once: true }
   )
 })
 
-function creatTooltipHTML(text) {
+function creatTooltipHTML(text, style) {
   return `
   <div class="tooltip-outer">
     <div class="tooltip">${text}</div>
-    <div class="tooltip-arrow tooltip-arrow-top ">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-right">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-left">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-left">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-top-right">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-top-left">&#10148;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-right">&#10148;</div>
-  </div>`
-  return `
-  <div class="tooltip-outer">
-    <div class="tooltip">${text}</div>
-    <div class="tooltip-arrow tooltip-arrow-top ">&uharr;</div>
-    <div class="tooltip-arrow tooltip-arrow-right">&rhard;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom">&dharl;</div>
-    <div class="tooltip-arrow tooltip-arrow-left">&lharu;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-left">&swarr;</div>
-    <div class="tooltip-arrow tooltip-arrow-top-right">&nearr;</div>
-    <div class="tooltip-arrow tooltip-arrow-top-left">&nwarr;</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-right">&searr;</div>
+    <div class="tooltip-arrow tooltip-arrow-top ">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-right">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-left">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-left">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-top-right">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-top-left">${style}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-right">${style}</div>
   </div>`
 }
 
