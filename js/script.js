@@ -3,7 +3,7 @@ import setupDragAndDrop from './dragAndDrop.js'
 import generateUniqueString from '../utils/generateUniqueString.js'
 import addGlobalEventListener from '../utils/addGlobalEventListener.js'
 import randomInteger from '../utils/randomInteger.js'
-
+import { createLaneHTML, createTaskHTML } from './createHTML.js'
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
 const DEFAULT_LANES = [
@@ -35,15 +35,16 @@ setupDragAndDrop(onDragComplete)
  * @param {Object} information
  */
 function onDragComplete({ startZone, endZone, dragElement, index } = {}) {
-  //欄位名
+
+  //欄位id
   const startLaneId = startZone.closest('[data-id]').dataset.id
   const endLaneId = endZone.closest('[data-id]').dataset.id
 
   //找出欄位裡的tasks
   const startLaneTasks = lanes.find((l) => l.id === startLaneId).tasks
   const endLaneTasks = lanes.find((l) => l.id === endLaneId).tasks
-  //找出被拖曳的task
 
+  //找出被拖曳的task
   const task = startLaneTasks.find((t) => t.id === dragElement.dataset.taskId)
 
   if (task) {
@@ -109,7 +110,6 @@ function renderLanes() {
 
 // add lane
 const addLaneBtn = document.querySelector('[data-add-lane]')
-
 addLaneBtn.addEventListener('click', addLane)
 
 function addLane() {
@@ -243,6 +243,248 @@ window.addEventListener('scroll', (e) => {
   document.body.classList.toggle('scroll-down', isScrollDown)
 })
 
+
+// show edit title input
+document.addEventListener('dblclick', (e) => {
+  const header = e.target.closest('.lane__header')
+  if (!header) return
+  header.classList.add('show-input')
+  const input = header.querySelector('[data-change-title-input]')
+  const title = header.querySelector('.lane__title')
+
+  input.value = title.textContent.trim()
+
+  setupHideElementEvents(header, '.lane__header', 'show-input')
+})
+
+// edit lane title
+addGlobalEventListener('submit', '.lane__header__form', (e) => {
+  e.preventDefault()
+  const text = e.target.querySelector('[data-change-title-input]').value
+  if (text.trim() === '') return
+
+  const header = e.target.closest('.lane__header')
+  const title = header.querySelector('.lane__title')
+  const originalName = title.textContent.trim()
+
+  title.textContent = text
+  header.classList.remove('show-input')
+
+  const laneContainer = header.closest('.lane')
+  const lane = laneContainer.querySelector('.tasks')
+
+  lane.dataset.laneId = text
+
+  lanes.find((l) => l.name === originalName).name = text
+  saveLanes()
+})
+
+// Hide element
+function setupHideElementEvents(element, selector, className) {
+  const hideFunction = (e) => {
+    if (e.target.closest(selector) === element) return
+    element.classList.remove(className)
+    document.removeEventListener('click', hideFunction)
+  }
+
+  document.addEventListener('click', hideFunction)
+}
+
+// Edit task
+addGlobalEventListener('click', '[data-edit-task]', (e) => {
+  const task = e.target.closest('.task')
+  const tasksContainer = e.target.closest('.tasks')
+  const titleInput = tasksContainer.querySelector('.edit-task-input')
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+  const taskTitle = task.querySelector('.task-title').textContent.trim()
+  const taskNotes = task.dataset.tooltip
+  const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
+  const fontSize = parseFloat(task.dataset.fontSize)
+  const arrowSize = parseFloat(task.dataset.arrowSize)
+  const radioButton = tasksContainer.querySelector(`.tooltip-font-size-input[value='${fontSize}']`)
+  const fgInput = tasksContainer.querySelector('[data-tooltip-fg-input]')
+  const bgInput = tasksContainer.querySelector('[data-tooltip-bg-input]')
+  const bgColor = task.dataset.bgColor
+  const fgColor = task.dataset.fgColor
+  const showArrow = arrowSize > 0
+  const arrowOnToggle = tasksContainer.querySelector('[data-arrow-toggle="ON"]')
+  const arrowOffToggle = tasksContainer.querySelector('[data-arrow-toggle="OFF"]')
+
+  titleInput.value = taskTitle
+  textarea.value = taskNotes
+  textarea.style.fontSize = `${fontSize}rem`
+  textarea.style.color = fgColor
+  textarea.style.backgroundColor = bgColor
+  radioButton.checked = true
+  fgInput.value = fgColor
+  bgInput.value = bgColor
+  showArrow ? arrowOnToggle.checked = true : arrowOffToggle.checked = true
+
+  tasksContainer.classList.add('show-edit-form')
+  tasksContainer.dataset.taskId = task.dataset.taskId
+  tasksContainer.dataset.taskTitle = taskTitle
+
+  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
+  buttons.forEach((btn) => {
+    if (tooltipPosition.some((p) => p === btn.dataset.position)) {
+      btn.classList.add('is-selected')
+    }
+    btn.querySelector('.arrow-box').innerHTML = showArrow ? btn.dataset.arrow : "&#10063;"
+  })
+  showPositionOrderNumber(tooltipPosition, buttons)
+})
+
+// Show tooltip position order number besides arrows
+function showPositionOrderNumber(tooltipPosition, buttons) {
+  buttons.forEach(b => b.querySelector('.num-box').innerHTML = "")
+  tooltipPosition.forEach((position, index) => {
+    const btn = buttons.find((b) => b.dataset.position === position)
+    if (btn) {
+      const numCode = `&#1010${index + 2};`
+      const numCode2 = `&#1011${index + 2};`
+      const numBox = btn.querySelector('.num-box');
+      // btn.dataset.order = index + 1
+      numBox.innerHTML = numCode
+    }
+  })
+}
+
+// arrows around edit form textarea
+addGlobalEventListener('click', '.arrow', (e) => {
+  const button = e.target
+  const buttons = [...button.parentElement.querySelectorAll('.arrow')]
+  const positionName = button.dataset.position.trim()
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  let tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
+  button.classList.toggle('is-selected')
+  const isSelected = button.classList.contains('is-selected')
+
+  tooltipPosition = isSelected
+    ? [...tooltipPosition, positionName]
+    : tooltipPosition.filter((position) => position !== positionName)
+
+  showPositionOrderNumber(tooltipPosition, buttons)
+
+  task.dataset.positions = tooltipPosition.join('|')
+})
+
+// submit edited task
+addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
+  e.preventDefault()
+  const input = e.target.elements['task-title']
+  const textarea = e.target.elements['task-notes']
+  const buttons = [...e.target.querySelectorAll('.arrow')]
+  buttons.forEach((b) => b.classList.remove('is-selected'))
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const $lane = tasksContainer.closest('.lane')
+  const $task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+
+  const newTitle = input.value
+  if (newTitle.trim() === '') return
+  const newNotes = textarea.value
+  $task.dataset.tooltip = newNotes.trim()
+  $task.querySelector('.task-title').textContent = newTitle
+
+  const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
+  const task = tasks.find((t) => t.id === taskId)
+
+  task.text = newTitle
+  task.notes = newNotes
+  task.tooltipPosition = $task.dataset.positions
+  task.fontSize = $task.dataset.fontSize
+  task.arrowSize = $task.dataset.arrowSize
+  task.fgColor = $task.dataset.fgColor
+  task.bgColor = $task.dataset.bgColor
+
+  saveLanes()
+
+  tasksContainer.classList.remove('show-edit-form')
+})
+
+// tooltip font size input
+addGlobalEventListener('input', '.tooltip-font-size-input', e => {
+  const fontSize = parseFloat(e.target.value)
+  const tasksContainer = e.target.closest('.tasks')
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+
+  task.dataset.fontSize = `${fontSize}rem`
+  task.dataset.arrowSize = `${fontSize + 0.5}rem`
+
+  textarea.style.fontSize = `${fontSize}rem`
+})
+
+// tooltip font size input label
+addGlobalEventListener('click', '[data-font-size-label]', e => {
+  const value = e.target.dataset.fontSizeLabel
+  const input = e.target.parentElement.querySelector(`.tooltip-font-size-input[value="${value}"]`)
+  if (input) input.click()
+})
+
+// arrow toggle
+addGlobalEventListener('change', '[data-arrow-toggle]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const fontSize = parseFloat(task.dataset.fontSize)
+  const status = e.target.value
+
+  task.dataset.arrowSize = status === "ON" ? `${fontSize + 0.5}rem` : "0rem"
+
+  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
+  buttons.forEach((btn) => {
+    btn.querySelector('.arrow-box').innerHTML = status === "ON" ? btn.dataset.arrow : "&#10063;"
+  })
+})
+
+// arrow toggle label
+addGlobalEventListener('click', '[data-arrow-toggle-label]', e => {
+  const value = e.target.dataset.arrowToggleLabel
+  const input = e.target.parentElement.querySelector(`[data-arrow-toggle=${value}]`)
+
+  if (input) input.click()
+})
+
+
+// text color input
+addGlobalEventListener('input', '[data-tooltip-fg-input]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const fgColor = e.target.value
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+
+
+  task.dataset.fgColor = fgColor
+  textarea.style.color = fgColor
+})
+
+// bg color input
+addGlobalEventListener('input', '[data-tooltip-bg-input]', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+  const bgColor = e.target.value
+  const textarea = tasksContainer.querySelector('.edit-task-notes')
+
+
+  task.dataset.bgColor = bgColor
+  textarea.style.backgroundColor = bgColor
+})
+
+// text and bg color inputs' labels
+addGlobalEventListener('click', '[data-tooltip-color-input-label]', e => {
+  const value = e.target.dataset.tooltipColorInputLabel
+  const input = e.target.parentElement.querySelector(`[data-tooltip-${value}-input]`)
+  if (input) input.click()
+})
+
+
+// animation
 function animateDeleteLane(lane) {
   gsap.to(lane, { opacity: 0, duration: 0.5, ease: Power4.easeOut })
   gsap.to(lane, {
@@ -307,369 +549,7 @@ function animateLoading() {
     }
   })
 }
-
-// show edit title input
-document.addEventListener('dblclick', (e) => {
-  const header = e.target.closest('.lane__header')
-  if (!header) return
-  header.classList.add('show-input')
-  const input = header.querySelector('[data-change-title-input]')
-  const title = header.querySelector('.lane__title')
-
-  input.value = title.textContent.trim()
-
-  setupHideElementEvents(header, '.lane__header', 'show-input')
-})
-
-// edit lane title
-addGlobalEventListener('submit', '.lane__header__form', (e) => {
-  e.preventDefault()
-  const text = e.target.querySelector('[data-change-title-input]').value
-  if (text.trim() === '') return
-
-  const header = e.target.closest('.lane__header')
-  const title = header.querySelector('.lane__title')
-  const originalName = title.textContent.trim()
-
-  title.textContent = text
-  header.classList.remove('show-input')
-
-  const laneContainer = header.closest('.lane')
-  const lane = laneContainer.querySelector('.tasks')
-
-  lane.dataset.laneId = text
-
-  lanes.find((l) => l.name === originalName).name = text
-  saveLanes()
-})
-
-// Hide element
-function setupHideElementEvents(element, selector, className, targetElements) {
-  const hideFunction = (e) => {
-    if (e.target.closest(selector) === element) return
-    element.classList.remove(className)
-    document.removeEventListener('click', hideFunction)
-  }
-
-  document.addEventListener('click', hideFunction)
-}
-
-// Edit task
-addGlobalEventListener('click', '[data-edit-task]', (e) => {
-  const task = e.target.closest('.task')
-  const tasksContainer = e.target.closest('.tasks')
-  const titleInput = tasksContainer.querySelector('.edit-task-input')
-  const textarea = tasksContainer.querySelector('.edit-task-notes')
-  const taskTitle = task.querySelector('.task-title').textContent.trim()
-  const taskNotes = task.dataset.tooltip
-  const tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
-  const fontSize = parseFloat(task.dataset.fontSize)
-  const arrowSize = parseFloat(task.dataset.arrowSize)
-  const radioButton = tasksContainer.querySelector(`.tooltip-font-size-input[value='${fontSize}']`)
-  const fgInput = tasksContainer.querySelector('[data-tooltip-fg-input]')
-  const bgInput = tasksContainer.querySelector('[data-tooltip-bg-input]')
-  const bgColor = task.dataset.bgColor
-  const fgColor = task.dataset.fgColor
-  const showArrow = arrowSize > 0
-  const arrowOnToggle = tasksContainer.querySelector('[data-arrow-toggle="ON"]')
-  const arrowOffToggle = tasksContainer.querySelector('[data-arrow-toggle="OFF"]')
-
-  titleInput.value = taskTitle
-  textarea.value = taskNotes
-  textarea.style.fontSize = `${fontSize}rem`
-  textarea.style.color = fgColor
-  textarea.style.backgroundColor = bgColor
-  radioButton.checked = true
-  fgInput.value = fgColor
-  bgInput.value = bgColor
-  showArrow ? arrowOnToggle.checked = true : arrowOffToggle.checked = true
-
-  tasksContainer.classList.add('show-edit-form')
-  tasksContainer.dataset.taskId = task.dataset.taskId
-  tasksContainer.dataset.taskTitle = taskTitle
-
-  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
-  buttons.forEach((btn) => {
-    if (tooltipPosition.some((p) => p === btn.dataset.position)) {
-      btn.classList.add('is-selected')
-    }
-    btn.querySelector('.arrow-box').innerHTML = showArrow ? btn.dataset.arrow : "&#10063;"
-  })
-  showPositionOrderNumber(tooltipPosition, buttons)
-})
-
-//Show tooltip position order number besides arrows
-function showPositionOrderNumber(tooltipPosition, buttons) {
-  buttons.forEach(b => b.querySelector('.num-box').innerHTML = "")
-  tooltipPosition.forEach((position, index) => {
-    const btn = buttons.find((b) => b.dataset.position === position)
-    if (btn) {
-      const numCode = `&#1010${index + 2};`
-      const numCode2 = `&#1011${index + 2};`
-      const numBox = btn.querySelector('.num-box');
-      // btn.dataset.order = index + 1
-      numBox.innerHTML = numCode
-    }
-  })
-}
-
-// edit task arrows
-addGlobalEventListener('click', '.arrow', (e) => {
-  const button = e.target
-  const buttons = [...button.parentElement.querySelectorAll('.arrow')]
-  const positionName = button.dataset.position.trim()
-  const tasksContainer = e.target.closest('.tasks')
-  const taskId = tasksContainer.dataset.taskId
-  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-  let tooltipPosition = task.dataset.positions === '' ? [] : task.dataset.positions.split('|')
-  button.classList.toggle('is-selected')
-  const isSelected = button.classList.contains('is-selected')
-
-  tooltipPosition = isSelected
-    ? [...tooltipPosition, positionName]
-    : tooltipPosition.filter((position) => position !== positionName)
-
-  showPositionOrderNumber(tooltipPosition, buttons)
-
-  task.dataset.positions = tooltipPosition.join('|')
-})
-
-// submit edited task
-addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
-  e.preventDefault()
-  const input = e.target.elements['task-title']
-  const textarea = e.target.elements['task-notes']
-  const buttons = [...e.target.querySelectorAll('.arrow')]
-  buttons.forEach((b) => b.classList.remove('is-selected'))
-  const tasksContainer = e.target.closest('.tasks')
-  const taskId = tasksContainer.dataset.taskId
-  const $lane = tasksContainer.closest('.lane')
-  const $task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-
-  const newTitle = input.value
-  if (newTitle.trim() === '') return
-  const newNotes = textarea.value
-  $task.dataset.tooltip = newNotes.trim()
-  $task.querySelector('.task-title').textContent = newTitle
-
-  const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
-  const task = tasks.find((t) => t.id === taskId)
-
-  task.text = newTitle
-  task.notes = newNotes
-  task.tooltipPosition = $task.dataset.positions
-  task.fontSize = $task.dataset.fontSize
-  task.arrowSize = $task.dataset.arrowSize
-  task.fgColor = $task.dataset.fgColor
-  task.bgColor = $task.dataset.bgColor
-
-  saveLanes()
-
-  tasksContainer.classList.remove('show-edit-form')
-})
-
-// Create task HTML
-function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
-  return `
-  <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
-    }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}" data-arrow="${arrowStyle}">
-    <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
-    <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
-    <p class="task-title">${text}</p>
-  </div>`
-}
-
-// tooltip font size input
-addGlobalEventListener('input', '.tooltip-font-size-input', e => {
-  const fontSize = parseFloat(e.target.value)
-  const tasksContainer = e.target.closest('.tasks')
-  const textarea = tasksContainer.querySelector('.edit-task-notes')
-  const taskId = tasksContainer.dataset.taskId
-  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-
-  task.dataset.fontSize = `${fontSize}rem`
-  task.dataset.arrowSize = `${fontSize + 0.5}rem`
-
-  textarea.style.fontSize = `${fontSize}rem`
-})
-// tooltip font size input
-addGlobalEventListener('click', '[data-font-size-label]', e => {
-  const value = e.target.dataset.fontSizeLabel
-  const input = e.target.parentElement.querySelector(`.tooltip-font-size-input[value="${value}"]`)
-  if (input) input.click()
-})
-
-function createEditFormHTML() {
-  return `
-  <form data-edit-task-form class="task-edit-form">
-    <input type="text" name="task-title" class="edit-task-input"  placeholder="改什麼好呢..." autoComplete="off">
-    <div class="task-edit-form__notes-settings">
-      <textarea name="task-notes" class="edit-task-notes" placeholder="1. 新增文字&#10;2. 自訂顏色&#10;3. 自訂提示框的顯示順位" autoComplete="off"></textarea>
-      
-      <div data-arrow="&darr;" data-position="top" class="arrow arrow-up">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&rarr;" data-position="left" class="arrow arrow-left">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&larr;" data-position="right" class="arrow arrow-right">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&uarr;" data-position="bottom" class="arrow arrow-down">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&searr;" data-position="topLeft" class="arrow arrow-nw">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&swarr;" data-position="topRight" class="arrow arrow-ne">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&nearr;" data-position="bottomLeft" class="arrow arrow-sw">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-      <div data-arrow="&nwarr;" data-position="bottomRight" class="arrow arrow-se">
-        <div class="arrow-box"></div>
-        <div class="num-box"></div>
-      </div>
-    </div>
-    <div class="task-edit-form__tooltip-styles" >
-      <div class="wrapper">
-        <div>
-          <span>字體:</span>
-          <input type="radio" value=2 id="" name="size"   class="tooltip-font-size-input" hidden>
-          <label data-font-size-label=2 class="font-size-big">大</label>
-
-          <input type="radio" value=1.5 id="" name="size"   class="tooltip-font-size-input" hidden>
-          <label data-font-size-label=1.5 class="font-size-medium">中</label>  
-
-          <input type="radio" value=1 id="" name="size"   class="tooltip-font-size-input" hidden>
-          <label data-font-size-label=1 class="font-size-small">小</label>
-        </div>
-
-        <div>
-          <label data-tooltip-color-input-label="bg">背景</label>
-          <input type="color" data-tooltip-bg-input>
-        </div>  
-  
-        <div>  
-          <label data-tooltip-color-input-label="fg">字</label>
-          <input type="color" data-tooltip-fg-input>
-        </div>  
-      </div>
-      <div class="wrapper">
-        <div>
-          <span>箭頭:</span>
-          <input type="radio" value="ON"  name="arrow-toggle"   data-arrow-toggle="ON" hidden>
-          <label data-arrow-toggle-label="ON">ON</label>
-          <input type="radio" value="OFF" name="arrow-toggle"   data-arrow-toggle="OFF" hidden>
-          <label data-arrow-toggle-label="OFF">OFF</label>
-        </div>
-      </div>
-      
-    </div>
-    <button class="edit-task-submit-btn" type="submit">OK!</button>
-  </form>`
-}
-
-
-// arrow toggle
-addGlobalEventListener('change', '[data-arrow-toggle]', e => {
-  const tasksContainer = e.target.closest('.tasks')
-  const taskId = tasksContainer.dataset.taskId
-  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-  const fontSize = parseFloat(task.dataset.fontSize)
-  const status = e.target.value
-
-  console.log(e.target)
-
-  task.dataset.arrowSize = status === "ON" ? `${fontSize + 0.5}rem` : "0rem"
-
-  const buttons = [...tasksContainer.querySelectorAll('.arrow')]
-  buttons.forEach((btn) => {
-    btn.querySelector('.arrow-box').innerHTML = status === "ON" ? btn.dataset.arrow : "&#10063;"
-  })
-})
-
-addGlobalEventListener('click', '[data-arrow-toggle-label]', e => {
-  const value = e.target.dataset.arrowToggleLabel
-  const input = e.target.parentElement.querySelector(`[data-arrow-toggle=${value}]`)
-
-  if (input) input.click()
-})
-
-
-
-addGlobalEventListener('input', '[data-tooltip-fg-input]', e => {
-  const tasksContainer = e.target.closest('.tasks')
-  const taskId = tasksContainer.dataset.taskId
-  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-  const fgColor = e.target.value
-  const textarea = tasksContainer.querySelector('.edit-task-notes')
-
-
-  task.dataset.fgColor = fgColor
-  textarea.style.color = fgColor
-})
-
-addGlobalEventListener('input', '[data-tooltip-bg-input]', e => {
-  const tasksContainer = e.target.closest('.tasks')
-  const taskId = tasksContainer.dataset.taskId
-  const task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
-  const bgColor = e.target.value
-  const textarea = tasksContainer.querySelector('.edit-task-notes')
-
-
-  task.dataset.bgColor = bgColor
-  textarea.style.backgroundColor = bgColor
-})
-
-addGlobalEventListener('click', '[data-tooltip-color-input-label]', e => {
-  const value = e.target.dataset.tooltipColorInputLabel
-  const input = e.target.parentElement.querySelector(`[data-tooltip-${value}-input]`)
-  if (input) input.click()
-})
-
-
-// Create lane HTML
-function createLaneHTML({ id, name, color, tasks = '' } = {}) {
-  if (tasks == null) return
-  return `
-  <div data-id=${id} class="lane" style="--clr-modifier:${color};}">
-    <div class="lane__header">
-      <h2 class="lane__title">
-         ${name}
-      </h2>
-      <button class="color-bar-toggler"></button>
-      <input data-color-bar class="slider" type="range" min="0" max="360" step="5" value=${color}>
-      <ion-icon data-delete-lane class="delete-btn" name="close-circle"></ion-icon>
-      <form class="lane__header__form">
-        <div class="form-group">
-          <input type="text" data-change-title-input autoComplete="off" placeholder="請輸入...">
-          <button class="submit-btn" type="submit">
-            <ion-icon name="checkmark-circle"></ion-icon>
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="tasks " data-drop-zone data-lane-id="${name}">
-      ${tasks.map(createTaskHTML).join('')}
-      <div class="edit-task-form-container">
-        ${createEditFormHTML()}
-      </div>
-    </div>
-    <form data-task-form class="task-form">
-      <input data-task-input class="task-input" type="text" placeholder="新增項目" />
-      <button data-submit-task-btn class="submit-task-btn"></button>
-    </form>
-  </div>`
-}
+// animation
 
 let lanes = loadLanes()
 renderLanes()
