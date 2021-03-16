@@ -209,6 +209,9 @@ addGlobalEventListener('click', '[data-delete-task]', (e) => {
   saveLanes()
 
   animateDeleteTask($task)
+
+  const tooltipContainer = document.querySelector('.tooltip-container')
+  tooltipContainer.innerHTML = ""
 })
 
 // delete lane
