@@ -1,6 +1,6 @@
 export function createLaneHTML({ id, name, color, tasks = '' } = {}) {
   if (tasks == null) return
-  return `
+  return DOMPurify.sanitize(`
   <div data-id=${id} class="lane" style="--clr-modifier:${color};}">
     <div class="lane__header">
       <h2 class="lane__title">
@@ -28,7 +28,7 @@ export function createLaneHTML({ id, name, color, tasks = '' } = {}) {
       <input data-task-input class="task-input" type="text" placeholder="新增項目" />
       <button data-submit-task-btn class="submit-task-btn"></button>
     </form>
-  </div>`
+  </div>`)
 }
 
 export function createEditFormHTML() {
@@ -111,11 +111,11 @@ export function createEditFormHTML() {
 }
 
 export function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
-  return `
+  return DOMPurify.sanitize(`
   <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
     }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}" data-arrow="${arrowStyle}">
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>
-  </div>`
+  </div>`)
 }
