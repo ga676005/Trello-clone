@@ -72,6 +72,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const taskElement = createTaskHTML(newTask)
   tasksContainer.innerHTML += taskElement
   taskInput.value = ''
+  taskInput.focus()
 
   saveLanes()
 })
