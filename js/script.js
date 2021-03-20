@@ -10,24 +10,25 @@ import formatLastEditTime from '../utils/formatLastEditTime.js'
 
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
+const DEFAULT_TASKS_PROPERTIES = { notes: null, tooltipPosition: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", }
 const DEFAULT_LANES = [
   {
     id: '1',
     name: '待辦',
     color: 220,
-    tasks: [{ id: '1', text: '在下方輸入內容新增項目', notes: null }]
+    tasks: [{ id: '1', text: '在下方輸入內容新增項目', ...DEFAULT_TASKS_PROPERTIES }]
   },
   {
     id: '2',
     name: '進行中',
     color: 0,
-    tasks: [{ id: '2', text: '按著我移動到其他欄位中', notes: null }]
+    tasks: [{ id: '2', text: '按著我移動到其他欄位中', ...DEFAULT_TASKS_PROPERTIES }]
   },
   {
     id: '3',
     name: '完成',
     color: 150,
-    tasks: [{ id: '3', text: '點右上角的圖標變換顏色', notes: null }]
+    tasks: [{ id: '3', text: '點右上角的圖標變換顏色', ...DEFAULT_TASKS_PROPERTIES }]
   }
 ]
 const lanesContainer = document.querySelector('[data-lanes-container]')
@@ -66,7 +67,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = DOMPurify.sanitize(taskInput.value)
   if (taskText === '') return
-  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '', lastEdit: getUnixTime(new Date()) }
+  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", lastEdit: getUnixTime(new Date()) }
   const lane = e.target.closest('.lane')
   const laneId = lane.dataset.id
   const tasksContainer = lane.querySelector('.tasks')
@@ -122,7 +123,7 @@ function addLane() {
     id: generateUniqueString(5),
     name: '自訂標題',
     color: randomInteger(1, 360),
-    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目' }]
+    tasks: [{ id: generateUniqueString(5), text: '在下方輸入內容新增項目', lastEdit: getUnixTime(new Date()), ...DEFAULT_TASKS_PROPERTIES }]
   }
 
   const laneHTML = createLaneHTML(DEFAULT_NEW_LANE)
