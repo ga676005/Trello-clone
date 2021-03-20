@@ -4,6 +4,7 @@ import generateUniqueString from '../utils/generateUniqueString.js'
 import addGlobalEventListener from '../utils/addGlobalEventListener.js'
 import randomInteger from '../utils/randomInteger.js'
 import { createLaneHTML, createTaskHTML } from './createHTML.js'
+import DOMPurify from 'dompurify'
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
 const DEFAULT_LANES = [
@@ -60,7 +61,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   e.preventDefault()
   e.target.classList.remove('show-add-button')
   const taskInput = e.target.querySelector('[data-task-input]')
-  const taskText = taskInput.value
+  const taskText = DOMPurify.sanitize(taskInput.value)
   if (taskText === '') return
   const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '' }
   const lane = e.target.closest('.lane')
@@ -264,7 +265,7 @@ document.addEventListener('dblclick', (e) => {
 // edit lane title
 addGlobalEventListener('submit', '.lane__header__form', (e) => {
   e.preventDefault()
-  const text = e.target.querySelector('[data-change-title-input]').value
+  const text = DOMPurify.sanitize(e.target.querySelector('[data-change-title-input]').value)
   if (text.trim() === '') return
 
   const header = e.target.closest('.lane__header')
@@ -276,11 +277,15 @@ addGlobalEventListener('submit', '.lane__header__form', (e) => {
 
   const laneContainer = header.closest('.lane')
   const lane = laneContainer.querySelector('.tasks')
+  const laneId = laneContainer.dataset.id
 
   lane.dataset.laneId = text
 
-  lanes.find((l) => l.name === originalName).name = text
-  saveLanes()
+  const laneData = lanes.find((l) => l.id === laneId)
+  if (laneData) {
+    laneData.name = text
+    saveLanes()
+  }
 })
 
 // Hide element
@@ -388,7 +393,7 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
 
   const newTitle = input.value
   if (newTitle.trim() === '') return
-  const newNotes = textarea.value
+  const newNotes = DOMPurify.sanitize(textarea.value)
   $task.dataset.tooltip = newNotes.trim()
   $task.querySelector('.task-title').textContent = newTitle
 
