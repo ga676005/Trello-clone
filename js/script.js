@@ -385,6 +385,26 @@ addGlobalEventListener('click', '.arrow', (e) => {
   task.dataset.positions = tooltipPosition.join('|')
 })
 
+// cancel editing
+addGlobalEventListener('click', '.edit-task-cancel-btn', e => {
+  const tasksContainer = e.target.closest('.tasks')
+  const taskId = tasksContainer.dataset.taskId
+  const $lane = tasksContainer.closest('.lane')
+  const $task = tasksContainer.querySelector(`[data-task-id="${taskId}"]`)
+
+  const task = lanes.find(l => l.id === $lane.dataset.id).tasks
+    .find(task => task.id === taskId)
+
+  // reset changes
+  $task.dataset.positions = task.tooltipPosition
+  $task.dataset.fontSize = task.fontSize
+  $task.dataset.arrowSize = task.arrowSize
+  $task.dataset.bgColor = task.bgColor
+  $task.dataset.fgColor = task.fgColor
+
+  tasksContainer.classList.remove('show-edit-form')
+})
+
 // submit edited task
 addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   e.preventDefault()

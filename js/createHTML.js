@@ -110,6 +110,9 @@ export function createEditFormHTML() {
       
     </div>
     <button class="edit-task-submit-btn" type="submit">OK!</button>
+    <button class="edit-task-cancel-btn" type="button">
+      <ion-icon class="edit-task-cancel-icon" name="arrow-undo-circle"></ion-icon>
+    </button>
   </form>`
 }
 
