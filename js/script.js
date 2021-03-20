@@ -5,6 +5,9 @@ import addGlobalEventListener from '../utils/addGlobalEventListener.js'
 import randomInteger from '../utils/randomInteger.js'
 import { createLaneHTML, createTaskHTML } from './createHTML.js'
 import DOMPurify from 'dompurify'
+import { getUnixTime } from 'date-fns/esm'
+import formatLastEditTime from '../utils/formatLastEditTime.js'
+
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
 const DEFAULT_LANES = [
@@ -63,7 +66,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = DOMPurify.sanitize(taskInput.value)
   if (taskText === '') return
-  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '' }
+  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '', lastEdit: getUnixTime(new Date()) }
   const lane = e.target.closest('.lane')
   const laneId = lane.dataset.id
   const tasksContainer = lane.querySelector('.tasks')
@@ -318,6 +321,8 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   const showArrow = arrowSize > 0
   const arrowOnToggle = tasksContainer.querySelector('[data-arrow-toggle="ON"]')
   const arrowOffToggle = tasksContainer.querySelector('[data-arrow-toggle="OFF"]')
+  const lastEditTime = task.dataset.lastEdit
+  const lastEditText = tasksContainer.querySelector('[data-last-edit-text]')
 
   titleInput.value = taskTitle
   textarea.value = taskNotes
@@ -328,6 +333,7 @@ addGlobalEventListener('click', '[data-edit-task]', (e) => {
   fgInput.value = fgColor
   bgInput.value = bgColor
   showArrow ? arrowOnToggle.checked = true : arrowOffToggle.checked = true
+  lastEditText.textContent = lastEditTime ? formatLastEditTime(task.dataset.lastEdit) : "無"
 
   tasksContainer.classList.add('show-edit-form')
   tasksContainer.dataset.taskId = task.dataset.taskId
@@ -396,17 +402,17 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   const newNotes = DOMPurify.sanitize(textarea.value)
   $task.dataset.tooltip = newNotes.trim()
   $task.querySelector('.task-title').textContent = newTitle
+  $task.dataset.lastEdit = getUnixTime(new Date())
 
-  const tasks = lanes.find((l) => l.id === $lane.dataset.id).tasks
-  const task = tasks.find((t) => t.id === taskId)
+  const lane = lanes.find(l => l.id === $lane.dataset.id)
+  lane.tasks = lane.tasks.map(task => {
+    if (task.id === taskId) {
+      const { tooltipPosition, fontSize, arrowSize, fgColor, bgColor, lastEdit } = $task.dataset
 
-  task.text = newTitle
-  task.notes = newNotes
-  task.tooltipPosition = $task.dataset.positions
-  task.fontSize = $task.dataset.fontSize
-  task.arrowSize = $task.dataset.arrowSize
-  task.fgColor = $task.dataset.fgColor
-  task.bgColor = $task.dataset.bgColor
+      return { ...task, text: newTitle, notes: newNotes, tooltipPosition, fontSize, arrowSize, fgColor, bgColor, lastEdit }
+    }
+    return task
+  })
 
   saveLanes()
 

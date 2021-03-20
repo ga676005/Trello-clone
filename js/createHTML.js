@@ -103,6 +103,9 @@ export function createEditFormHTML() {
           <input type="radio" value="OFF" name="arrow-toggle"   data-arrow-toggle="OFF" hidden>
           <label data-arrow-toggle-label="OFF">OFF</label>
         </div>
+        <div>
+          <p class="last-update-time">距離上次修改: <span data-last-edit-text></span></p>
+        </div>
       </div>
       
     </div>
@@ -110,10 +113,21 @@ export function createEditFormHTML() {
   </form>`
 }
 
-export function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;" } = {}) {
+export function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;", lastEdit = "" } = {}) {
   return `
-  <div class="task" data-draggable data-task-id=${id} data-tooltip="${notes ?? ''
-    }" data-spacing="0" data-positions="${tooltipPosition}" data-font-size="${fontSize}" data-arrow-size="${arrowSize}" data-fg-color="${fgColor}" data-bg-color="${bgColor}" data-arrow="${arrowStyle}">
+  <div class="task" 
+    data-draggable
+    data-task-id=${id}
+    data-tooltip="${notes ?? ''}" 
+    data-spacing="0" 
+    data-positions="${tooltipPosition}" 
+    data-font-size="${fontSize}"
+    data-arrow-size="${arrowSize}"
+    data-fg-color="${fgColor}"
+    data-bg-color="${bgColor}"
+    data-arrow="${arrowStyle}"
+    data-last-Edit="${lastEdit}"
+    >
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>
     <ion-icon data-edit-task class="edit-task" name="create-outline"></ion-icon>
     <p class="task-title">${text}</p>

@@ -300,17 +300,6 @@ button {
 .edit-task-notes {
   grid-area: textarea;
 }
-/* 
-.arrow.is-selected::before {
-  content: attr(data-order);
-  color: rgba(0, 0, 0);
-  position: absolute;
-  font-size: 2rem;
-  top: -1rem;
-  left: 0;
-  z-index: 1;
-  font-weight: 500;
-} */
 
 .arrow {
   display: grid;
@@ -389,6 +378,10 @@ button {
 }
 [data-arrow-toggle]:checked + label {
   opacity: 1;
+}
+
+.last-update-time {
+  opacity: 0.35;
 }
 /* #region arrows */
 .arrow {
