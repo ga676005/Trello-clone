@@ -87,7 +87,7 @@
   color: var(--clr-neutral-800);
   cursor: var(--grab, grab);
   margin: 0.25rem 0;
-  word-wrap: break-word;
+  word-break: break-all;
   text-align: center;
   font-size: 1.5rem;
 }
