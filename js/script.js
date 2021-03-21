@@ -170,7 +170,7 @@ function handleUpload() {
         return updatedTasks
       }, [])
 
-      return { ...localLane, name: uploadLane.name, tasks: updatedTasks }
+      return { ...localLane, name: uploadLane.name, color: uploadLane.color, tasks: updatedTasks }
     })
 
     const distinctLanes = uploadData.filter(uploadLane => {
