@@ -129,6 +129,7 @@ export function createTaskHTML({ id, text, notes = null, tooltipPosition = '', f
     data-fg-color="${fgColor}"
     data-bg-color="${bgColor}"
     data-arrow="${arrowStyle}"
+    data-arrow-direction="right"
     data-last-Edit="${lastEdit}"
     >
     <ion-icon data-delete-task class="delete-btn" name="close-circle"></ion-icon>

@@ -1,0 +1,78 @@
+header {
+  position: sticky;
+  top: 0;
+  margin-bottom: 2rem;
+  padding: 1.5rem 0 2.5rem;
+  z-index: 100;
+  background-color: hsla(0, 0%, 0%, 0);
+  transition: background-color 0.5s linear;
+}
+
+.scroll-down header {
+  background-color: hsla(0, 0%, 0%, 1);
+}
+
+.toolbar ul {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+}
+
+.toolbar__list-item {
+  position: relative;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+}
+
+.toolbar__list-item > button {
+  display: grid;
+  place-content: center;
+  font-size: min(15vw, 5rem);
+  color: hsl(0, 0%, 100%);
+}
+.toolbar__list-item > label {
+  width: max-content;
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  font-size: 1.3rem;
+  transform: scale(0.5) translateX(-50%);
+  opacity: 0;
+  transition: transform, opacity, color;
+  transition-duration: 0.3s;
+  transform-origin: left;
+}
+.toolbar__list-item:hover > label {
+  transform: scale(1) translate(-50%, 50%);
+  opacity: 1;
+  color: hsl(0, 0%, 100%);
+}
+
+.delete-mode .delete-mode-text {
+  opacity: 1;
+  transform: scale(1) translate(-50%, 50%);
+  color: hsl(0, 0%, 100%);
+}
+
+.add-circle {
+  color: hsl(118, 88%, 68%);
+}
+.trash {
+  color: hsl(0, 88%, 68%);
+}
+.cloud-upload {
+  color: hsl(178, 88%, 68%);
+}
+.cloud-download {
+  color: hsl(66, 88%, 68%);
+}
+
+ion-icon {
+  display: block;
+}
+ion-icon:hover {
+  opacity: 0.9;
+}

@@ -1,71 +1,3 @@
-:root {
-  --clr-neutral-0: rgb(255, 255, 255);
-  --clr-neutral-100: hsla(0, 0%, 90%, 0.8);
-  --clr-neutral-200: hsla(0, 0%, 100%, 0.9);
-  --clr-neutral-400: hsl(0, 0%, 50%);
-  --clr-neutral-500: hsl(0, 0%, 40%);
-  --clr-neutral-600: hsl(0, 0%, 30%);
-  --clr-neutral-800: hsl(0, 0%, 10%, 0.9);
-  --clr-neutral-900: hsl(0, 0%, 10%);
-
-  --box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.005), 0 6.7px 5.3px rgba(0, 0, 0, 0.011),
-    0 12.5px 10px rgba(0, 0, 0, 0.018), 0 22.3px 17.9px rgba(0, 0, 0, 0.026),
-    0 41.8px 33.4px rgba(0, 0, 0, 0.038), 0 100px 80px rgba(0, 0, 0, 0.06);
-
-  --tooltip-base-fs: 1rem;
-  --tooltip-width: 18ch;
-  --tooltip-padding: 0.3em;
-}
-
-*,
-::before,
-::after {
-  box-sizing: border-box;
-  user-select: none;
-  cursor: var(--grab);
-  text-rendering: optimizeSpeed;
-}
-
-body {
-  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  margin: 0;
-  background-color: var(--clr-neutral-400);
-  background-image: url('./images/background.webp');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-blend-mode: multiply;
-  background-attachment: fixed;
-  font-size: 2rem;
-  overflow-x: hidden;
-}
-
-/* reset */
-h1,
-h2,
-p,
-ul,
-li {
-  margin: 0;
-  padding: 0;
-  font-weight: 400;
-}
-input,
-button,
-textarea {
-  font: inherit;
-  border: none;
-  background: none;
-  outline: none;
-  resize: none;
-}
-
-button {
-  cursor: pointer;
-}
-
-/* #region lane */
-
 .lanes {
   display: grid;
   gap: 2rem;
@@ -132,19 +64,6 @@ button {
   opacity: 1;
 }
 
-.form-group {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-}
-
-.form-group button {
-  justify-self: right;
-  grid-column: 1;
-  grid-row-start: 1;
-  color: green;
-}
-
 .lane__header__form input {
   width: 100%;
   grid-row-start: 1;
@@ -158,8 +77,7 @@ button {
   padding: 0 0.25rem;
   flex-grow: 1;
   overflow-y: auto;
-  overflow: hidden;
-  /* position: relative; */
+  // height: 400px;
 }
 
 .task {
@@ -184,6 +102,7 @@ button {
   color: var(--clr-neutral-200);
   pointer-events: none;
 }
+
 .edit-task {
   position: absolute;
   height: 100%;
@@ -197,10 +116,69 @@ button {
   transition: transform 0.2s ease-out, opacity 0.2s ease;
   cursor: pointer;
 }
+
 .task:hover .edit-task {
   opacity: 1;
   transform: scale(1);
 }
+
+/* #region  add task */
+
+.task-input {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: hsl(var(--clr-primary));
+  color: white;
+  outline: none;
+  width: 100%;
+  font-size: 1.5rem;
+}
+
+.task-input::placeholder {
+  opacity: 0.6;
+  font-weight: 300;
+  color: var(--clr-neutral-100);
+}
+
+.lane:hover .task-input::placeholder {
+  opacity: 1;
+}
+
+.task-form {
+  position: relative;
+}
+
+.submit-task-btn {
+  position: absolute;
+  z-index: -1;
+  display: block;
+  width: 1em;
+  height: 1em;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(-270deg);
+  background: linear-gradient(90deg, white, white), linear-gradient(90deg, white, white),
+    linear-gradient(90deg, white, white), linear-gradient(90deg, white, white);
+  background-repeat: no-repeat;
+  background-size: 0.25em 0.5em, 0.5em 0.25em, 0.25em 0.5em, 0.5em 0.25em;
+  background-position: 50% -200%, 300% 50%, 50% 300%, -200% 50%;
+  transition: transform 0.5s ease-out, background-position 0.5s 0.3s, z-index 0s 1s;
+  opacity: 0.5;
+}
+
+.show-add-button .submit-task-btn {
+  z-index: 1;
+  transform: translateY(-50%) rotate(0deg) scale(1);
+  background-position: top center, right center, bottom center, left center;
+  transition: transform 0.3s ease-out 0.3s, background-position 0.5s;
+}
+
+.submit-task-btn:active,
+.submit-task-btn:hover {
+  opacity: 0.9;
+}
+
+/* #endregion  add task */
 
 /* #region edit task */
 .show-edit-form .task-edit-form {
@@ -407,7 +385,10 @@ button {
 .last-update-time {
   opacity: 0.35;
 }
-/* #region arrows */
+
+/* #endregion edit task */
+
+/* #region edit task arrows */
 .arrow {
   padding: 0.1em;
   position: relative;
@@ -543,126 +524,9 @@ button {
 
 /* #endregion arrows */
 
-/* #endregion edit task */
+/* #endregion edit */
 
-/* #region  add task */
-.task-input {
-  padding: 0.5rem 1rem;
-  border: none;
-  background-color: hsl(var(--clr-primary));
-  color: white;
-  outline: none;
-  width: 100%;
-  font-size: 1.5rem;
-}
-
-.task-input::placeholder {
-  opacity: 0.6;
-  font-weight: 300;
-  color: var(--clr-neutral-100);
-}
-
-.lane:hover .task-input::placeholder {
-  opacity: 1;
-}
-
-/* #endregion  add task */
-
-[data-draggable] {
-  user-select: none;
-}
-
-[data-draggable].hide {
-  display: none !important;
-}
-
-[data-draggable].dragging {
-  position: absolute;
-  opacity: 0.5;
-  transform: rotate(5deg);
-  pointer-events: none;
-}
-
-[data-draggable].ghost {
-  background-color: black;
-  opacity: 0.25;
-}
-
-/* color bar's position */
-.lane__header {
-  position: relative;
-}
-
-[data-color-bar] {
-  position: absolute;
-  top: -1.5rem;
-  left: 0;
-  opacity: 0;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  pointer-events: none;
-}
-
-.color-bar-toggler {
-  display: block;
-  position: absolute;
-  top: 0.3rem;
-  right: 0.3rem;
-  background-size: cover;
-  padding: 1rem;
-  background-image: url(images/color-wheel.png);
-  opacity: 0.6;
-}
-
-.color-bar-toggler:hover,
-.color-bar-toggler:focus {
-  opacity: 1;
-  transform: scale(1.2);
-}
-
-.color-bar-toggler:focus + [data-color-bar],
-[data-color-bar]:focus {
-  opacity: 1;
-  z-index: 1;
-  pointer-events: initial;
-}
-
-.task-form {
-  position: relative;
-}
-
-.submit-task-btn {
-  position: absolute;
-  z-index: -1;
-  display: block;
-  width: 1em;
-  height: 1em;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%) rotate(-270deg);
-  background: linear-gradient(90deg, white, white), linear-gradient(90deg, white, white),
-    linear-gradient(90deg, white, white), linear-gradient(90deg, white, white);
-  background-repeat: no-repeat;
-  background-size: 0.25em 0.5em, 0.5em 0.25em, 0.25em 0.5em, 0.5em 0.25em;
-  background-position: 50% -200%, 300% 50%, 50% 300%, -200% 50%;
-  transition: transform 0.5s ease-out, background-position 0.5s 0.3s, z-index 0s 1s;
-  opacity: 0.5;
-}
-
-.show-add-button .submit-task-btn {
-  z-index: 1;
-  transform: translateY(-50%) rotate(0deg) scale(1);
-  background-position: top center, right center, bottom center, left center;
-  transition: transform 0.3s ease-out 0.3s, background-position 0.5s;
-}
-
-.submit-task-btn:active,
-.submit-task-btn:hover {
-  opacity: 0.9;
-}
-
-/* delete button */
+/* #region delete mode*/
 .task {
   position: relative;
 }
@@ -691,243 +555,18 @@ button {
   height: 2rem;
   border-radius: 100%;
   z-index: -1;
-  background-color: rgba(255, 0, 0, 0.952);
+  background-color: hsl(0, 84%, 52%);
 }
 
-.delete-mode .task:hover .delete-btn {
+.delete-mode :is(.task:hover, .lane__header:hover) .delete-btn {
   display: block;
-}
-
-.delete-mode .lane__header:hover .delete-btn {
-  display: block;
-}
-
-/* #endregion */
-
-/* #region toolbar */
-header {
-  position: sticky;
-  top: 0;
-  margin-bottom: 2rem;
-  padding: 1.5rem 0 2.5rem;
-  z-index: 100;
-  background-color: hsla(0, 0%, 0%, 0);
-  transition: background-color 0.5s linear;
-}
-
-.scroll-down header {
-  background-color: hsla(0, 0%, 0%, 1);
-}
-
-.toolbar ul {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  list-style: none;
-}
-
-.toolbar__list-item {
-  position: relative;
-  cursor: pointer;
-  display: grid;
-  place-content: center;
-}
-
-.toolbar__list-item > button {
-  display: grid;
-  place-content: center;
-  font-size: min(15vw, 5rem);
-  color: hsl(0, 0%, 100%);
-}
-.toolbar__list-item > label {
-  width: max-content;
-  position: absolute;
-  left: 50%;
-  bottom: -16px;
-  font-size: 1.3rem;
-  transform: scale(0.5) translateX(-50%);
-  opacity: 0;
-  transition: transform, opacity, color;
-  transition-duration: 0.3s;
-  transform-origin: left;
-}
-.toolbar__list-item:hover > label {
-  transform: scale(1) translate(-50%, 50%);
   opacity: 1;
-  color: hsl(0, 0%, 100%);
 }
 
-.delete-mode .delete-mode-text {
-  opacity: 1;
-  transform: scale(1) translate(-50%, 50%);
-  color: hsl(0, 0%, 100%);
+.delete-btn:hover {
+  color: hsl(0, 100%, 55%);
 }
-
-.add-circle {
-  color: hsl(118, 88%, 68%);
+.delete-btn:hover::after {
+  background-color: black;
 }
-.trash {
-  color: hsl(0, 88%, 68%);
-}
-.cloud-upload {
-  color: hsl(178, 88%, 68%);
-}
-.cloud-download {
-  color: hsl(66, 88%, 68%);
-}
-
-ion-icon {
-  display: block;
-}
-ion-icon:hover {
-  opacity: 0.9;
-}
-/* #endregion */
-
-/* range slider */
-.slider {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 15px;
-  border-radius: 5px;
-  background: hsl(var(--clr-secondary));
-  outline: none;
-  -webkit-transition: 0.2s;
-  transition: opacity 0.2s;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: hsl(var(--clr-primary));
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: hsl(var(--clr-primary));
-  cursor: pointer;
-}
-
-/* Tooltip */
-
-.tooltip-container {
-  position: fixed;
-  pointer-events: none;
-  margin: 0;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-}
-
-.tooltip {
-  font-size: var(--tooltip-fs, var(--tooltip-base-fs));
-  padding: var(--tooltip-padding);
-  max-width: var(--tooltip-width);
-  border-radius: 0.25rem;
-  background-color: var(--tooltip-bg-clr, rgb(255, 255, 255));
-  color: var(--tooltip-fg-clr, rgba(17, 17, 17, 0.87));
-  box-shadow: 0px 0px 5px rgba(1, 1, 1, 0.2), 0px 0px 5px var(--tooltip-bg-clr);
-  font-weight: 300;
-  border: 2px solid black;
-  border-image: linear-gradient(-25deg, var(--tooltip-bg-clr), var(--tooltip-fg-clr)) 1;
-  filter: drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.5));
-  word-break: break-word;
-}
-
-.tooltip-outer {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: fit-content;
-  grid-template-columns: auto minmax(50px, auto) auto;
-  grid-template-rows: auto auto auto;
-  grid-template-areas:
-    'tl t tr'
-    'l  m  r'
-    'bl b br';
-  z-index: 0;
-  gap: var(--tooltip-spacing);
-}
-
-.tooltip-arrow {
-  font-size: var(--tooltip-arrow-fs);
-  font-weight: 900;
-  z-index: -1;
-  color: var(--tooltip-bg-clr);
-  filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
-}
-
-.tooltip-arrow {
-  color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-  background-repeat: no-repeat;
-  background-size: 200px 200px;
-  background-position-x: -200px;
-
-  background-image: linear-gradient(
-    -90deg,
-    transparent,
-    var(--tooltip-bg-clr) 30% 70%,
-    transparent
-  );
-
-  animation: flashArrow 3s infinite normal;
-  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  animation-play-state: paused;
-}
-
-.animate-tooltip {
-  animation-play-state: running;
-}
-
-.tooltip-arrow-top {
-  grid-area: t;
-  transform: rotate(-90deg);
-}
-.tooltip-arrow-right {
-  grid-area: r;
-  transform: rotate(0deg);
-}
-.tooltip-arrow-bottom {
-  grid-area: b;
-  transform: rotate(90deg);
-}
-.tooltip-arrow-left {
-  grid-area: l;
-  transform: rotate(180deg);
-}
-
-.tooltip-arrow-bottom-left {
-  grid-area: bl;
-  transform: rotate(135deg);
-}
-.tooltip-arrow-top-right {
-  grid-area: tr;
-  transform: rotate(-45deg);
-}
-.tooltip-arrow-top-left {
-  grid-area: tl;
-  transform: rotate(-135deg);
-}
-.tooltip-arrow-bottom-right {
-  grid-area: br;
-  transform: rotate(45deg);
-}
-
-@keyframes flashArrow {
-  0% {
-    background-position-x: -200px;
-  }
-  100% {
-    background-position-x: 50px;
-  }
-}
+/* #endregion delete */

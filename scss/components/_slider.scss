@@ -1,0 +1,67 @@
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: hsl(var(--clr-secondary));
+  outline: none;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: hsl(var(--clr-primary));
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: hsl(var(--clr-primary));
+  cursor: pointer;
+}
+
+.lane__header {
+  position: relative;
+}
+
+[data-color-bar] {
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.color-bar-toggler {
+  display: block;
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  background-size: cover;
+  padding: 1rem;
+  background-image: url(../images/color-wheel.png);
+  opacity: 0.6;
+}
+
+.color-bar-toggler:hover,
+.color-bar-toggler:focus {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.color-bar-toggler:focus + [data-color-bar],
+[data-color-bar]:focus {
+  opacity: 1;
+  z-index: 1;
+  pointer-events: initial;
+}

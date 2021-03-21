@@ -1,0 +1,220 @@
+.tooltip-container {
+  --tooltip-base-fs: 1rem;
+  --tooltip-width: 18ch;
+  --tooltip-padding: 0.3em;
+  --tooltip-base-rotation: 180deg;
+  --arrow-right-translate-start: translateX(-50%);
+  --arrow-right-translate-end: translateX(30%);
+  --arrow-up-translate-start: translateY(50%);
+  --arrow-up-translate-end: translateY(-30%);
+  --arrow-down-translate-start: translateY(-50%);
+  --arrow-down-translate-end: translateY(30%);
+  --arrow-left-translate-start: translateX(50%);
+  --arrow-left-translate-end: translateX(-30%);
+
+  --arrow-translate-start: var(--arrow-left-translate-start);
+  --arrow-translate-end: var(--arrow-left-translate-end);
+
+  position: fixed;
+  pointer-events: none;
+  margin: 0;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+.tooltip {
+  font-size: var(--tooltip-fs, var(--tooltip-base-fs));
+  padding: var(--tooltip-padding);
+  max-width: var(--tooltip-width);
+  border-radius: 0.25rem;
+  background-color: var(--tooltip-bg-clr, rgb(255, 255, 255));
+  color: var(--tooltip-fg-clr, rgba(17, 17, 17, 0.87));
+  font-weight: 300;
+
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  background: linear-gradient(var(--tooltip-bg-clr) 0% 100%);
+  background-clip: padding-box;
+  box-shadow: 2px 3px 4px 0px rgba(0, 0, 0, 0.53);
+  white-space: pre-wrap;
+}
+
+.tooltip::after {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  background: linear-gradient(25deg, var(--tooltip-bg-clr), var(--tooltip-fg-clr));
+  content: '';
+  z-index: -1;
+  border-radius: 5px;
+}
+
+.tooltip-outer {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  grid-template-columns: auto minmax(50px, auto) auto;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    'tl t tr'
+    'l  m  r'
+    'bl b br';
+  z-index: 0;
+  gap: var(--tooltip-spacing);
+}
+
+.tooltip-arrow {
+  font-size: var(--tooltip-arrow-fs);
+  font-weight: 900;
+  z-index: -1;
+  color: var(--tooltip-bg-clr);
+  filter: drop-shadow(5px 5px 2px rgba(0, 0, 0, 0.5));
+}
+
+.tooltip-arrow {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-repeat: no-repeat;
+  background-size: 200px 200px;
+  background-position-x: -200px;
+
+  background-image: linear-gradient(
+    -90deg,
+    transparent,
+    var(--tooltip-bg-clr) 20% 80%,
+    transparent
+  );
+
+  animation-duration: 2.5s;
+  animation-iteration-count: infinite;
+  animation-duration: normal;
+  animation-timing-function: cubic-bezier(0, 0, 0.2, 1) ease-in-out;
+  animation-play-state: paused;
+}
+
+.animate-tooltip {
+  animation-play-state: running;
+}
+
+.tooltip-arrow-top {
+  animation-name: flashArrow, move-arrow-top;
+  grid-area: t;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 270deg));
+}
+.tooltip-arrow-right {
+  animation-name: flashArrow, move-arrow-right;
+  grid-area: r;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 0deg));
+}
+.tooltip-arrow-bottom {
+  animation-name: flashArrow, move-arrow-bottom;
+  grid-area: b;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 90deg));
+}
+.tooltip-arrow-left {
+  animation-name: flashArrow, move-arrow-left;
+  grid-area: l;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 180deg));
+}
+
+.tooltip-arrow-bottom-left {
+  animation-name: flashArrow, move-arrow-bottom-left;
+  grid-area: bl;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 135deg));
+}
+.tooltip-arrow-top-right {
+  animation-name: flashArrow, move-arrow-top-right;
+  grid-area: tr;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 315deg));
+}
+.tooltip-arrow-top-left {
+  animation-name: flashArrow, move-arrow-top-left;
+  grid-area: tl;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 225deg));
+}
+.tooltip-arrow-bottom-right {
+  animation-name: flashArrow, move-arrow-bottom-right;
+  grid-area: br;
+  transform: rotate(calc(var(--tooltip-base-rotation) + 45deg));
+}
+
+@keyframes flashArrow {
+  0% {
+    background-position-x: -200px;
+  }
+  100% {
+    background-position-x: 50px;
+  }
+}
+
+@keyframes move-arrow-top {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 270deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 270deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-right {
+  0% {
+    transform: rotate(var(--tooltip-base-rotation)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(var(--tooltip-base-rotation)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-bottom {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 90deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 90deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-left {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 180deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 180deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-bottom-left {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 135deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 135deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-top-right {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 315deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 315deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-top-left {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 225deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 225deg)) var(--arrow-translate-end);
+  }
+}
+@keyframes move-arrow-bottom-right {
+  0% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 45deg)) var(--arrow-translate-start);
+  }
+  100% {
+    transform: rotate(calc(var(--tooltip-base-rotation) + 45deg)) var(--arrow-translate-end);
+  }
+}

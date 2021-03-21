@@ -1,0 +1,19 @@
+[data-draggable] {
+  user-select: none;
+}
+
+[data-draggable].hide {
+  display: none !important;
+}
+
+[data-draggable].dragging {
+  position: absolute;
+  opacity: 0.5;
+  transform: rotate(5deg);
+  pointer-events: none;
+}
+
+[data-draggable].ghost {
+  background-color: black;
+  opacity: 0.25;
+}

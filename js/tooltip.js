@@ -12,11 +12,6 @@ const POSITION_TO_FUNCTION_MAP = {
   left: positionTooltipLeft,
   right: positionTooltipRight
 }
-const defaultBgColor = "rgb(255, 255, 255)"
-const defaultColor = "rgba(17, 17, 17, 0.87)"
-const defaultFontSize = "1rem"
-const defaultArrowFontSize = "1.5rem"
-const defaultSpacing = 1
 
 //定位tooltip用的container
 const tooltipContainer = document.createElement('div')
@@ -25,20 +20,11 @@ document.body.append(tooltipContainer)
 
 addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   if (e.target.dataset.tooltip.trim() === '') return
-  const { tooltip: tooltipText, bgColor, fgColor, fontSize, arrowSize, spacing, arrow } = e.target.dataset
 
-  tooltipContainer.innerHTML = creatTooltipHTML(tooltipText, arrow)
-
+  tooltipContainer.innerHTML = creatTooltipHTML(e.target.dataset)
   const tooltip = tooltipContainer.children[0]
-
-  //tooltip style
-  tooltipContainer.style.setProperty('--tooltip-bg-clr', bgColor ?? defaultBgColor)
-  tooltipContainer.style.setProperty('--tooltip-fg-clr', fgColor ?? defaultColor)
-  tooltipContainer.style.setProperty('--tooltip-fs', fontSize ?? defaultFontSize)
-  tooltipContainer.style.setProperty('--tooltip-arrow-fs', arrowSize ?? defaultArrowFontSize)
-  tooltipContainer.style.setProperty('--tooltip-spacing', `${spacing / 50 ?? defaultSpacing}rem`)
-
   positionTooltip(tooltip, e.target)
+  setupTooltipStyle(e.target)
 
   e.target.addEventListener(
     'mouseleave',
@@ -49,18 +35,18 @@ addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
   )
 })
 
-function creatTooltipHTML(text, style) {
+function creatTooltipHTML({ tooltip, arrow = "&#10148;" } = {}) {
   return `
   <div class="tooltip-outer">
-    <div class="tooltip">${text}</div>
-    <div class="tooltip-arrow tooltip-arrow-top ">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-right">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-left">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-left">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-top-right">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-top-left">${style}</div>
-    <div class="tooltip-arrow tooltip-arrow-bottom-right">${style}</div>
+    <div class="tooltip">${tooltip}</div>
+    <div class="tooltip-arrow tooltip-arrow-top ">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-right">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-left">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-left">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-top-right">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-top-left">${arrow}</div>
+    <div class="tooltip-arrow tooltip-arrow-bottom-right">${arrow}</div>
   </div>`
 }
 
@@ -72,7 +58,7 @@ function creatTooltipHTML(text, style) {
 function positionTooltip(tooltip, element) {
   const elementRect = element.getBoundingClientRect()
   const preferredPositions = (element.dataset.positions || '').split('|')
-  const spacing = parseInt(element.dataset.spacing) ?? DEFAULT_SPACING
+  const spacing = element.dataset.spacing ? parseInt(element.dataset.spacing) : DEFAULT_SPACING
   const positions = [...preferredPositions, ...POSITION_ORDER]
 
   //找對應的定位function執行
@@ -362,3 +348,24 @@ function positionTooltipArrow(direction) {
   arrow.classList.add('animate-tooltip')
 }
 
+function setupTooltipStyle(element) {
+  const { bgColor = "#ffffff", fgColor = "#000000", fontSize = "1rem", arrowSize = "1.5rem", spacing = "0", arrowDirection } = element.dataset
+  const ARROW_ROTATE_DEGREE = {
+    up: "90deg",
+    down: "270deg",
+    right: "0deg",
+    left: "180deg"
+  }
+  const degree = ARROW_ROTATE_DEGREE[arrowDirection]
+  const start = `var(--arrow-${arrowDirection}-translate-start)`
+  const end = `var(--arrow-${arrowDirection}-translate-end)`
+
+  tooltipContainer.style.setProperty('--tooltip-bg-clr', bgColor)
+  tooltipContainer.style.setProperty('--tooltip-fg-clr', fgColor)
+  tooltipContainer.style.setProperty('--tooltip-fs', fontSize)
+  tooltipContainer.style.setProperty('--tooltip-arrow-fs', arrowSize)
+  tooltipContainer.style.setProperty('--tooltip-base-rotation', degree)
+  tooltipContainer.style.setProperty('--tooltip-spacing', `${spacing / 50}rem`)
+  tooltipContainer.style.setProperty('--arrow-translate-start', start)
+  tooltipContainer.style.setProperty('--arrow-translate-end', end)
+}

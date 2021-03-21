@@ -1,0 +1,18 @@
+:root {
+  --clr-neutral-0: rgb(255, 255, 255);
+  --clr-neutral-100: hsla(0, 0%, 90%, 0.8);
+  --clr-neutral-200: hsla(0, 0%, 100%, 0.9);
+  --clr-neutral-400: hsl(0, 0%, 50%);
+  --clr-neutral-500: hsl(0, 0%, 40%);
+  --clr-neutral-600: hsl(0, 0%, 30%);
+  --clr-neutral-800: hsl(0, 0%, 10%, 0.9);
+  --clr-neutral-900: hsl(0, 0%, 10%);
+
+  --box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.005), 0 6.7px 5.3px rgba(0, 0, 0, 0.011),
+    0 12.5px 10px rgba(0, 0, 0, 0.018), 0 22.3px 17.9px rgba(0, 0, 0, 0.026),
+    0 41.8px 33.4px rgba(0, 0, 0, 0.038), 0 100px 80px rgba(0, 0, 0, 0.06);
+
+  --tooltip-base-fs: 1rem;
+  --tooltip-width: 18ch;
+  --tooltip-padding: 0.3em;
+}
