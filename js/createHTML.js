@@ -116,14 +116,14 @@ export function createEditFormHTML() {
   </form>`
 }
 
-export function createTaskHTML({ id, text, notes = null, tooltipPosition = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;", lastEdit = "" } = {}) {
+export function createTaskHTML({ id, text, notes = null, positions = '', fontSize = "1rem", arrowSize = "1.5rem", fgColor = "#000000", bgColor = "#f7f7f7", arrowStyle = "&#10148;", lastEdit = "" } = {}) {
   return `
   <div class="task" 
     data-draggable
     data-task-id=${id}
     data-tooltip="${notes ?? ''}" 
     data-spacing="0" 
-    data-positions="${tooltipPosition}" 
+    data-positions="${positions}" 
     data-font-size="${fontSize}"
     data-arrow-size="${arrowSize}"
     data-fg-color="${fgColor}"

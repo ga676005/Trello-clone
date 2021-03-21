@@ -10,7 +10,7 @@ import formatLastEditTime from '../utils/formatLastEditTime.js'
 
 const STORAGE_PREFIX = 'TRELLO_CLONE'
 const LANES_STORAGE_KEY = `${STORAGE_PREFIX}-lanes`
-const DEFAULT_TASKS_PROPERTIES = { notes: null, tooltipPosition: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", }
+const DEFAULT_TASKS_PROPERTIES = { notes: null, positions: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", }
 const DEFAULT_LANES = [
   {
     id: '1',
@@ -67,7 +67,7 @@ addGlobalEventListener('submit', '[data-task-form]', (e) => {
   const taskInput = e.target.querySelector('[data-task-input]')
   const taskText = DOMPurify.sanitize(taskInput.value)
   if (taskText === '') return
-  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, tooltipPosition: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", lastEdit: getUnixTime(new Date()) }
+  const newTask = { id: generateUniqueString(5), text: taskText, notes: null, positions: '', fontSize: "1rem", arrowSize: "1.5rem", fgColor: "#000000", bgColor: "#f7f7f7", lastEdit: getUnixTime(new Date()) }
   const lane = e.target.closest('.lane')
   const laneId = lane.dataset.id
   const tasksContainer = lane.querySelector('.tasks')
@@ -428,9 +428,8 @@ addGlobalEventListener('submit', '[data-edit-task-form]', (e) => {
   const lane = lanes.find(l => l.id === $lane.dataset.id)
   lane.tasks = lane.tasks.map(task => {
     if (task.id === taskId) {
-      const { tooltipPosition, fontSize, arrowSize, fgColor, bgColor, lastEdit } = $task.dataset
-
-      return { ...task, text: newTitle, notes: newNotes, tooltipPosition, fontSize, arrowSize, fgColor, bgColor, lastEdit }
+      const { positions, fontSize, arrowSize, fgColor, bgColor, lastEdit } = $task.dataset
+      return { ...task, text: newTitle, notes: newNotes, positions, fontSize, arrowSize, fgColor, bgColor, lastEdit }
     }
     return task
   })
