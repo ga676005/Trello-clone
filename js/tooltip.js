@@ -23,8 +23,8 @@ addGlobalEventListener('mouseover', '[data-tooltip]', (e) => {
 
   tooltipContainer.innerHTML = creatTooltipHTML(e.target.dataset)
   const tooltip = tooltipContainer.children[0]
-  positionTooltip(tooltip, e.target)
   setupTooltipStyle(e.target)
+  positionTooltip(tooltip, e.target)
 
   e.target.addEventListener(
     'mouseleave',
