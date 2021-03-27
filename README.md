@@ -1,6 +1,10 @@
 # gogotrello
-![Alt Text](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/po8epvqfpwexm9sfjl0q.png)
 ## Demo 連結: https://gogotrello.netlify.app/
+
+---
+  
+![gogoTrello preview](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/po8epvqfpwexm9sfjl0q.png)
+
 
 ###### 介紹: Trello-Clone是在線上課程中學到的，它的主軸是拖拉功能，[這是它原本的樣子](https://happy-booth-0d5d61.netlify.app/)，在學習的過程中我發現了一個很隱密的bug，跟老師回報後他說我可以自己修好，當時沒什麼概念，但又很在意bug，所以繼續加強JavaScript，兩個多月後覺得有信心了，重溫課程時除了修復bug，對它做了改進也新增許多功能。
 
